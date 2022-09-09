@@ -18,8 +18,8 @@ library(tidyverse)
 library(cheddar)
 
 # data and functions ----
-load("ToarcianWebs_Guild_May2021.RData")
-source("CoreScripts/ForPublication/NewMethod_Functions_update4Pub.R")
+load("./Data/ToarcianWebs_Guild_May2021.RData")
+source("NewMethod_Functions_update4Pub.R")
 
 # replicates of sequences of extinctions
 # for each trait, we generate 50 unique

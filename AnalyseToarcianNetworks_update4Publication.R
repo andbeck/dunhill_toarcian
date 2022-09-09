@@ -21,12 +21,12 @@ library(igraph)
 library(ggrepel)
 
 # original data and other metric functions ----
-load("ToarcianWebs_Guild_May2021.RData")
+load(".Data/ToarcianWebs_Guild_May2021.RData")
 source("NewMethod_Functions_update4Publication.R")
 
 #LOAD wrkWebs here to start anaysis of structure/motifs and TSS ----
 
-load("wrkWebs_allSeqs.RData")
+load("./Data/wrkWebs_allSeqs.RData")
 
 # setup masterSpecies list for TSS analysis.... ---- 
 
@@ -35,8 +35,8 @@ load("wrkWebs_allSeqs.RData")
 # the testWeb is then the set of 21 trophic links from the raw G2 data
 # we compare presence/absence of links in sims to raw, with core set of absences
 # defined by masterSpeces 0's in raw data.
-G1 <- read_csv("G1_Guilds.csv")
-G2 <- read_csv("G2_Guilds.csv")
+G1 <- read_csv("./Data/G1_Guilds.csv")
+G2 <- read_csv("./Data/G2_Guilds.csv")
 
 masterSpecies <- bind_rows(G1, G2) %>% unique() %>% 
   rename("node" = "Guild") %>% 
