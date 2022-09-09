@@ -22,7 +22,7 @@ library(ggrepel)
 
 # original data and other metric functions ----
 load("ToarcianWebs_Guild_May2021.RData")
-source("CoreScripts/NewMethod_Aug2021/NewMethod_Functions.R")
+source("NewMethod_Functions_update4Publication.R")
 
 #LOAD wrkWebs here to start anaysis of structure/motifs and TSS ----
 
@@ -35,8 +35,8 @@ load("wrkWebs_allSeqs.RData")
 # the testWeb is then the set of 21 trophic links from the raw G2 data
 # we compare presence/absence of links in sims to raw, with core set of absences
 # defined by masterSpeces 0's in raw data.
-G1 <- read_csv("./ToarcianData/GuildData2021/G1_Guilds.csv")
-G2 <- read_csv("./ToarcianData/GuildData2021/G2_Guilds.csv")
+G1 <- read_csv("G1_Guilds.csv")
+G2 <- read_csv("G2_Guilds.csv")
 
 masterSpecies <- bind_rows(G1, G2) %>% unique() %>% 
   rename("node" = "Guild") %>% 
@@ -47,7 +47,7 @@ masterStats <- data.frame(matrix(ncol = 4, nrow = 0))
 names(masterStats) <- c("metric", "stat", "estimate", "trait")
 
 # generate and collect all stats into single data frame ----
-# applying the motif, jack nets, cheddar nets and TSS
+# applying the jack motif, jack nets and TSS
 
 for(i in 1:length(wrkWebs_allSeqs)){
   code = names(wrkWebs_allSeqs[i])
@@ -72,15 +72,6 @@ for(i in 1:length(wrkWebs_allSeqs)){
       sdVal = sd(estimate)
     )
   
-  # apply the cheddar net stats to the webs by trait sequence
-  netStats_cheddar <- sapply(wrkWebs_allSeqs[[i]], function(x) cheddarNetworks(x)) %>% t() %>% 
-    data.frame() %>% pivot_longer(everything(), names_to = "metric", values_to = "estimate") %>% 
-    group_by(metric) %>% 
-    summarise(
-      meanVal = mean(estimate),
-      sdVal = sd(estimate)
-    )
-  
   # apply TSS stat from Anubhav to the webs by trait sequence
   tssStats <- sapply(wrkWebs_allSeqs[[i]], function(x) TSS_func_struc(x)) %>% 
     as_tibble(.) %>% 
@@ -92,14 +83,14 @@ for(i in 1:length(wrkWebs_allSeqs)){
     mutate(metric = "TSS") %>% 
     select(metric, meanVal, sdVal)
   
-  
-  outFull <- bind_rows(motifStats, netStats_Jack, netStats_cheddar, tssStats) %>% 
+  # no netStats_cheddar
+  outFull <- bind_rows(motifStats, netStats_Jack, tssStats) %>% 
     mutate(trait = paste(code))
   masterStats <- rbind(masterStats, outFull)
 }
 
 # Plots ----
-
+# define trait order for plotting on axies
 traitOrder <- c("rand",
                 "size_b2s","size_s2b",
                 "tier_i2p","tier_p2i",
@@ -108,6 +99,7 @@ traitOrder <- c("rand",
                 "gen_l2h","gen_h2l",
                 "vuln_l2h","vuln_h2l")
 
+# define metric order for plotting
 metricOrder <- c("connectance","mean_normalized_degree",
                  "sd_normalized_in_degree","sd_normalized_out_degree",
                  "mean_tl_std","max_tl_std","soi_std",
@@ -116,7 +108,10 @@ metricOrder <- c("connectance","mean_normalized_degree",
                  "TSS")
 
 
+# sampling reproducibility
 set.seed(123)
+
+# 4 samples of the 21 spp final networks for each sequence ----
 w <-  4
 par(mfrow = c(length(wrkWebs_allSeqs),w+1), mar = c(2,1,1,1))
 for(i in c(1,4,5,6,7,2,3,12,13,10,11,8,9)){
@@ -136,7 +131,7 @@ mm <- masterStats %>%
   mutate(metric = factor(metric, levels = metricOrder)) %>% 
   filter(metric != "size")
 
-# reference - UPDATED THIS TO JACK and CHEDDAR
+# reference - UPDATED THIS TO JACK metrics only to match Alex code use
 postMetrics <- jackNetworks(postCom_Guild) %>% 
   as.data.frame() %>% 
   rownames_to_column(var = "metric") %>%
@@ -172,21 +167,20 @@ netsUse <- nets %>%
 
 levels(netsUse$metric)
 
+# these are the core metrics we focus on: labelling
+
 net_labels <-  c(connectance = "Connectance",
                  sd_normalized_in_degree = "SD In Degree",
                  sd_normalized_out_degree = "SD Out Degree",
                  max_tl_std = "Max Trophic Level")
 
-#mean_normalized_degree = "Normalized Degree",                 
-#mean_tl = "Mean Trophic Level",
-#soi_std = "Omnivory Index",
-#diameter = "Diameter",
-#mean_norm_btw = "Betweenness")
-
 mot_labels <-  c(norm_mot_lin = "Linear Food Chain",
                  norm_mot_omn = "Omnivory",
                  norm_mot_ap_comp = "Apparent Competition",
                  norm_mot_dir_comp = "Direct Competition")
+
+
+# network structure and motif barplots ----
 
 net_plots <- ggplot(netsUse, aes(x = trait, y = meanVal, 
                                  fill = trait))+
@@ -228,9 +222,11 @@ TSS_graph <- ggplot(filter(mm, metric == "TSS"), aes(x = trait, y = meanVal,
         strip.text.x = element_text(size = 5))+
   guides(fill = "none")
 
+# barplot version 1 ----
 TSS_graph/(net_plots+mot_plots)
 
-# generate difference to reference ----
+# plots version 2: generate difference to reference ----
+
 mets <- rep(metricOrder[metricOrder!="size"], each = 13)
 refEst <- rep(postMetrics$estimate, each = 13) %>% 
   tibble(.,mets) %>% 
@@ -247,13 +243,18 @@ diffBounds <- diffDat %>%
     interval = 0.2*(max(abs(diffEst)))
   )
 
+# network differences
 diff_nets <- diffDat %>% filter(metric != "TSS") %>% 
   filter(!grepl("mot", metric))
 diff_mots <- diffDat %>% filter(grepl("mot", metric))
 
+# boundaries for visualisation
 bounds_nets <- diffBounds %>% filter(metric != "TSS") %>% 
   filter(!grepl("mot", metric))
 bounds_mots <- diffBounds %>% filter(grepl("mot", metric))
+
+
+# Plots v2 - difference barplots with boundaries ----
 
 # plot difference with 10% max difference area'd
 diffPlot_nets <- ggplot(diff_nets, aes(x = trait, y = diffEst, 
@@ -278,7 +279,8 @@ diffPlot_mots <- ggplot(diff_mots, aes(x = trait, y = diffEst,
 TSS_graph+(diffPlot_nets/diffPlot_mots)
 
 
-### Williams and Martinez Style
+### Plots version 3 - Williams and Martinez Style ----
+# plot differences from reference among sequences as dots for each metric and identify
 # closest metrics
 
 nets_close <- diff_nets %>% 
@@ -306,7 +308,7 @@ xlabs <- c("Connectance", "Max Trophic Level","Mean Trophic Level", "Omnivory In
            "Apparent Competition Motif","Direct Competition Motif",
            "Linear Food Chain Motif","Omnivory Motif")
 
-
+## Version 3 Plot ----
 ggplot(all_diffs, aes(x = mets, y = diffEst, 
                       group = trait, colour = trait))+
   geom_jitter(height = 0, width = 0.1)+
@@ -349,7 +351,9 @@ out_res <- bind_rows( nets_res, mots_res)  %>%
                        "norm_mot_dir_comp"
   ))
 
-# generate table of non-zero closest to trait counts
+# generate table and write out which trait sequence is closest for each metric ----
+# and how many tmes particular trait sequences are closest
+
 out_res_report <- with(out_res, table(trait)) %>% data.frame() %>% 
   filter(Freq>0) %>%
   arrange(desc(Freq))
@@ -357,5 +361,6 @@ out_res_report <- with(out_res, table(trait)) %>% data.frame() %>%
 out_res
 out_res_report
 
-write_csv(out_res, file = "metric-sequence_association.csv")
-write_csv(out_res_report, file = "closest_sequence_count.csv")
+# # uncomment to write
+# write_csv(out_res, file = "metric-sequence_association.csv")
+# write_csv(out_res_report, file = "closest_sequence_count.csv")

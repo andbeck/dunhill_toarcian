@@ -1,14 +1,14 @@
 ## Assorted Functions used in Dunhill et al 
 
-
-# # function to get true skill stats after extinctions made
-# # Hanssen–Kuipers discriminant
-# # https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.1365-2664.2006.01214.x
-# # Anubhav MS with Owen
+# function to make true skill stats comparison ----
+# Hanssen–Kuipers discriminant
+# code from Gupta et al Simultaneously estimating food web connectance and structure with uncertainty
+# https://doi.org/10.1002/ece3.8643
+# see also https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/j.1365-2664.2006.01214.x
 
 # structure Only (Anubhav and Owen Function)
 # ss_sim and ss_real need to be predation matrices
-# 
+
 TSS_func_struc <- function(ExtWeb){
   if (is.null(masterSpecies)) {
     stop("masterSpecies List is missing")
@@ -36,31 +36,8 @@ TSS_func_struc <- function(ExtWeb){
   return(dist_TSS_r)
 }
 
-#Function to get proportion of species that are different
-speciesChange <- function(truthMat, predictMat){
-  
-  truth_sp <- dimnames(truthMat)[[1]]
-  predict_sp <- dimnames(predictMat)[[1]]
-  
-  # postCom_Guild$nodes$node == dimnames(PredationMatrix(postCom_Guild))[[1]]
-  
-  in_truth_in_predict <- predict_sp[predict_sp %in% truth_sp]
-  in_truth_not_predict <- predict_sp[!predict_sp %in% truth_sp]
-  in_predict_in_truth <- truth_sp[truth_sp %in% predict_sp] # same as 1
-  in_predict_not_truth <- truth_sp[!truth_sp %in% predict_sp]
-  
-  numRetained <- length(in_truth_in_predict)
-  numNew <- length(in_predict_not_truth)
-  
-  propRetained <- numRetained/length(truth_sp)
-  propNew <- 1-propRetained
-  
-  return(list(retainedSpecies = retainedSpecies,
-              newSpecies = newSpecies,
-              propRetained = propRetained,
-              propNew = propNew))
-  
-}
+# Functions to get Motif and Network Stats ----
+# ported from Shaw et al....
 
 # Motifs S1, S2, S4, S5
 jackMotifs <- function(web){
@@ -72,22 +49,6 @@ jackMotifs <- function(web){
 jackNetworks <- function(web){
   gg <- igraph::graph_from_edgelist(as.matrix(web$trophic.links))
   return(calc_select_stats(gg))
-}
-
-# function to get stats on networks with 21 species
-# adjusted to get most of Jacks stats.
-# includes use of True Skill stats
-# modify with Owens TO DO
-cheddarNetworks <- function(web){
-  TRmax <-  max(TrophicHeight(web))
-  sd_InDeg <-  sd(NormalisedTrophicVulnerability(web))
-  med_InDeg <- median(NormalisedTrophicVulnerability(web))
-  sd_OutDeg <-  sd(NormalisedTrophicGenerality(web))
-  med_OutDeg <- median(NormalisedTrophicGenerality(web))
-  
-  return(c(TRMax = TRmax,
-                    sd_InDeg = sd_InDeg, med_InDeg = med_InDeg, 
-                    sd_OutDeg = sd_OutDeg, med_OutDeg = med_OutDeg))
 }
 
 # function to ID who is extinct
