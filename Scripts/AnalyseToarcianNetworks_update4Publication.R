@@ -9,7 +9,7 @@
 
 # PFIM ----
 # clone the repo, then install from local.
-#remotes::install_local("~/Documents/GitHubRepos/PFIM")
+remotes::install_local("~/Documents/GitHubRepos/PFIM")
 
 library(pfwim)
 
@@ -21,12 +21,13 @@ library(igraph)
 library(ggrepel)
 
 # original data and other metric functions ----
-load(".Data/ToarcianWebs_Guild_May2021.RData")
-source("NewMethod_Functions_update4Publication.R")
+load("Data/ToarcianWebs_Guild_May2021.RData")
+source("Scripts/NewMethod_Functions_update4Publication.R")
+source("Scripts/pfim_scripts.R")
 
 #LOAD wrkWebs here to start anaysis of structure/motifs and TSS ----
 
-load("./Data/wrkWebs_allSeqs.RData")
+load("Data/wrkWebs_allSeqs.RData")
 
 # setup masterSpecies list for TSS analysis.... ---- 
 
@@ -35,8 +36,8 @@ load("./Data/wrkWebs_allSeqs.RData")
 # the testWeb is then the set of 21 trophic links from the raw G2 data
 # we compare presence/absence of links in sims to raw, with core set of absences
 # defined by masterSpeces 0's in raw data.
-G1 <- read_csv("./Data/G1_Guilds.csv")
-G2 <- read_csv("./Data/G2_Guilds.csv")
+G1 <- read_csv("Data/G1_Guilds.csv")
+G2 <- read_csv("Data/G2_Guilds.csv")
 
 masterSpecies <- bind_rows(G1, G2) %>% unique() %>% 
   rename("node" = "Guild") %>% 
@@ -245,8 +246,40 @@ diffBounds <- diffDat %>%
 
 # network differences
 diff_nets <- diffDat %>% filter(metric != "TSS") %>% 
-  filter(!grepl("mot", metric))
-diff_mots <- diffDat %>% filter(grepl("mot", metric))
+  filter(!grepl("mot", metric)) %>% 
+  mutate(trait2 = case_when(
+    trait == "rand" ~ "Random",
+    trait == "size_b2s" ~ "Size (Large-Small)",
+    trait == "size_s2b" ~ "Size (Small-Big)",
+    trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
+    trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
+    trait == "mot_fn" ~ "Motility (fast-none)",
+    trait == "mot_nf" ~ "Motility (none-fast)",
+    trait == "calc_l2h" ~ "Calcified (low-high)",
+    trait == "calc_h2l" ~ "Calcified (high-low)",
+    trait == "gen_l2h" ~ "Generalism (low-high)",
+    trait == "gen_h2l" ~ "Generalism (high-low)",
+    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
+    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
+  ))
+
+
+diff_mots <- diffDat %>% filter(grepl("mot", metric)) %>% 
+  mutate(trait2 = case_when(
+    trait == "rand" ~ "Random",
+    trait == "size_b2s" ~ "Size (Large-Small)",
+    trait == "size_s2b" ~ "Size (Small-Big)",
+    trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
+    trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
+    trait == "mot_fn" ~ "Motility (fast-none)",
+    trait == "mot_nf" ~ "Motility (none-fast)",
+    trait == "calc_l2h" ~ "Calcified (low-high)",
+    trait == "calc_h2l" ~ "Calcified (high-low)",
+    trait == "gen_l2h" ~ "Generalism (low-high)",
+    trait == "gen_h2l" ~ "Generalism (high-low)",
+    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
+    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
+  ))
 
 # boundaries for visualisation
 bounds_nets <- diffBounds %>% filter(metric != "TSS") %>% 
@@ -286,12 +319,12 @@ TSS_graph+(diffPlot_nets/diffPlot_mots)
 nets_close <- diff_nets %>% 
   group_by(metric) %>% 
   filter(abs(diffEst - 0) == min(abs(diffEst - 0))) %>% 
-  select(metric, trait)
+  select(metric, trait, trait2)
 
-# closests motifs
+# closest motifs
 mots_close <- diff_mots %>% group_by(metric) %>% 
   filter(abs(diffEst - 0) == min(abs(diffEst - 0)))  %>% 
-  select(metric, trait)
+  select(metric, trait, trait2)
 
 all_close <- bind_rows(nets_close, mots_close)
 all_diffs <- bind_rows(diff_nets, diff_mots) %>% 
@@ -310,16 +343,20 @@ xlabs <- c("Connectance", "Max Trophic Level","Mean Trophic Level", "Omnivory In
 
 ## Version 3 Plot ----
 ggplot(all_diffs, aes(x = mets, y = diffEst, 
-                      group = trait, colour = trait))+
-  geom_jitter(height = 0, width = 0.1)+
+                      group = trait2, colour = trait2))+
+  geom_jitter(height = 0, width = 0.1, size =2, alpha = 0.75)+
   scale_x_discrete(labels = xlabs)+
-  labs(x = "", y = "Difference from Reference", 
+  labs(x = "", y = "Difference from Empirical", 
        colour = "Sequence")+
   geom_text(data = all_close, aes(x = metric, y  = 0.5, 
-                                  label = trait),
-            inherit.aes = FALSE, size = 3, angle = 45)+
+                                  label = trait2),
+            inherit.aes = FALSE, size = 2, angle = 45, 
+            fontface = "italic")+
+  geom_hline(yintercept = 0)+
   theme_bw()+
-  theme(axis.text.x = element_text(angle = 90))
+  theme(axis.text.x = element_text(angle = 90, face = "bold"),
+        legend.position = 'top',
+        legend.title = element_blank())
 
 
 # which ones are closest ----
@@ -349,12 +386,29 @@ out_res <- bind_rows( nets_res, mots_res)  %>%
                        "norm_mot_omn",
                        "norm_mot_ap_comp",
                        "norm_mot_dir_comp"
+  )) %>% 
+  mutate(trait2 = case_when(
+    trait == "rand" ~ "Random",
+    trait == "size_b2s" ~ "Size (Large-Small)",
+    trait == "size_s2b" ~ "Size (Small-Big)",
+    trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
+    trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
+    trait == "mot_fn" ~ "Motility (fast-none)",
+    trait == "mot_nf" ~ "Motility (none-fast)",
+    trait == "calc_l2h" ~ "Calcified (low-high)",
+    trait == "calc_h2l" ~ "Calcified (high-low)",
+    trait == "gen_l2h" ~ "Generalism (low-high)",
+    trait == "gen_h2l" ~ "Generalism (high-low)",
+    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
+    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
   ))
+
+out_res
 
 # generate table and write out which trait sequence is closest for each metric ----
 # and how many tmes particular trait sequences are closest
 
-out_res_report <- with(out_res, table(trait)) %>% data.frame() %>% 
+out_res_report <- with(out_res, table(trait2)) %>% data.frame() %>% 
   filter(Freq>0) %>%
   arrange(desc(Freq))
 
