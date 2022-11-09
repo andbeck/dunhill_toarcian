@@ -18,15 +18,15 @@ library(tidyverse)
 library(cheddar)
 
 # data and functions ----
-load("./Data/ToarcianWebs_Guild_May2021.RData")
-source("NewMethod_Functions_update4Pub.R")
+load("Data/ToarcianWebs_Guild_May2021.RData")
+source("Scripts/NewMethod_Functions_update4publication.R")
 
 # replicates of sequences of extinctions
 # for each trait, we generate 50 unique
 # stratified random sequences of plausible extinction orders
 reps <- 50
 
-### SEQUENCES ####
+# SEQUENCES ----
 
 # define levels of motility and tiering
 pre_meta_Guild_use <- pre_meta_Guild %>%
@@ -40,14 +40,16 @@ pre_meta_Guild_use <- pre_meta_Guild %>%
 # pre_meta_Guild_use %>% arrange(tiering_i2p) %>% pull(tiering_i2p)
 # pre_meta_Guild_use %>% arrange(tiering_p2i) %>% pull(tiering_p2i)
 
-# random sequence of extinctions for each replicate ----
-set.seed(128)
+# create random sequence of extinctions for each replicate ----
 
+set.seed(128) # necessary for replication with random sampling
+
+## random order ----
 randOrd <- 1:reps %>% map(~sample(NonBasalNodes(preCom_Guild)))
 
-# non random orders ----
+## non random orders ----
 
-# ORDER: Both Orders - fast-> non (1) ; non->fast (2)
+### motility - fast-> non (1) ; non->fast (2) ----
 motOrd_fast_non <- 1:reps %>% map(~pre_meta_Guild_use %>%
                            arrange(motility_fn) %>%
                            group_by(motility_fn) %>%
@@ -63,7 +65,7 @@ motOrd_non_fast <- 1:reps %>% map(~pre_meta_Guild_use %>%
                                     pull(node))
 
 
-# ORDER: infaunal, epifaunal, pelagic, primary
+### infaunal, epifaunal, pelagic, primary ----
 tierOrd_i2p <- 1:reps %>% map(~pre_meta_Guild_use %>%
                             arrange(tiering_i2p) %>%
                             group_by(tiering_i2p) %>%
@@ -78,7 +80,7 @@ tierOrd_p2i <- 1:reps %>% map(~pre_meta_Guild_use %>%
                             filter(node != "BASAL NODE") %>%
                             pull(node))
 
-# this is largest to smallest
+### Size ----
 sizeOrd_b2s <- 1:reps %>% map(~pre_meta_Guild_use %>%
                             arrange(size) %>%
                             group_by(size) %>%
@@ -92,7 +94,7 @@ sizeOrd_s2b <- 1:reps %>% map(~pre_meta_Guild_use %>%
                                 sample_frac() %>%
                                 filter(node != "BASAL NODE") %>%
                                 pull(node))
-
+### Vulnerability ----
 vulnOrd_l2h <- 1:reps %>% map(~pre_meta_Guild_use %>%
                             arrange(vulnerability) %>%
                             group_by(vulnerability) %>%
@@ -106,7 +108,7 @@ vulnOrd_h2l <- 1:reps %>% map(~pre_meta_Guild_use %>%
                                 sample_frac() %>%
                                 filter(node != "BASAL NODE") %>%
                                 pull(node))
-
+### Generality ----
 genOrd_l2h <- 1:reps %>% map(~pre_meta_Guild_use %>%
                            arrange(generality) %>%
                            group_by(generality) %>%
@@ -121,6 +123,7 @@ genOrd_h2l <- 1:reps %>% map(~pre_meta_Guild_use %>%
                            filter(node != "BASAL NODE") %>%
                            pull(node))
 
+### Calcification ----
 calcOrd_h2l <- 1:reps %>% map(~pre_meta_Guild_use %>%
                             arrange(calcification) %>%
                             group_by(calcification) %>%
@@ -135,7 +138,7 @@ calcOrd_l2h <- 1:reps %>% map(~pre_meta_Guild_use %>%
                             filter(node != "BASAL NODE") %>%
                             pull(node))
 
-# This function drives primary extinction sequences with secondary allowed ----
+# Define function to drives primary extinction sequences with secondary allowed ----
 # done across all extinction order scenarios
 
 generate_seq <- function(extinctionOrder = randOrd){
@@ -202,31 +205,32 @@ generate_seq <- function(extinctionOrder = randOrd){
 }
 
 # Apply generate_seq() function to ALL OF THE EXTINCTION ORDERS defined above ----
-# all but randomExt are bi-directional.
+# NOTE: all but random are bi-directional.
 
+## random ----
 randomExt <- generate_seq(extinctionOrder = randOrd)
 
-# motility
+## motility ----
 motOrd_fast_nonExt <- generate_seq(extinctionOrder = motOrd_fast_non)
 motOrd_non_fastExt <- generate_seq(extinctionOrder = motOrd_non_fast)
 
-# tiering
+## tiering ----
 tierExt_i2p <- generate_seq(extinctionOrder = tierOrd_i2p)
 tierExt_p2i <- generate_seq(extinctionOrder = tierOrd_p2i)
 
-# size
+## size ----
 sizeExt_s2b <- generate_seq(extinctionOrder = sizeOrd_s2b)
 sizeExt_b2s <- generate_seq(extinctionOrder = sizeOrd_b2s)
 
-# vulnerability
+## vulnerability ----
 vulnExt_l2h <- generate_seq(extinctionOrder = vulnOrd_l2h)
 vulnExt_h2l <- generate_seq(extinctionOrder = vulnOrd_h2l)
 
-# generality
+## generality ----
 genExt_l2h <- generate_seq(extinctionOrder = genOrd_l2h)
 genExt_h2l <- generate_seq(extinctionOrder = genOrd_h2l)
 
-# calcification
+## calcification ----
 calcExt_h2l <- generate_seq(extinctionOrder = calcOrd_h2l)
 calcExt_l2h <- generate_seq(extinctionOrder = calcOrd_l2h)
 
@@ -254,7 +258,7 @@ wrkWebs_calc_h2l <- Filter(function(x) !is.null(x), calcExt_h2l[[1]])
 wrkWebs_calc_l2h <- Filter(function(x) !is.null(x), calcExt_l2h[[1]])
 
 
-# collect sequences ----
+# collect sequences to create master analysis data ----
 wrkWebs_allSeqs <- list(rand = wrkWebs_rand,
                         mot_fn = wrkWebs_motOrd_fast_non, mot_nf = wrkWebs_motOrd_non_fast,
                         size_s2b = wrkWebs_size_s2b, size_b2s = wrkWebs_size_b2s,
@@ -263,7 +267,7 @@ wrkWebs_allSeqs <- list(rand = wrkWebs_rand,
                         gen_l2h = wrkWebs_gen_l2h, gen_h2l = wrkWebs_gen_h2l,
                         calc_h2l = wrkWebs_calc_h2l, calc_l2h = wrkWebs_calc_l2h)
 
-# write sequence list for use in "AnalyseToarcianNetworks" Script ---
-save(wrkWebs_allSeqs, file = "wrkWebs_allSeqs.RData")
+## write sequence list for use in "AnalyseToarcianNetworks" Script ----
+# save(wrkWebs_allSeqs, file = "wrkWebs_allSeqs.RData")
 
 

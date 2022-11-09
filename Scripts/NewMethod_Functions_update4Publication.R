@@ -42,7 +42,7 @@ TSS_func_struc <- function(ExtWeb){
 # Motifs S1, S2, S4, S5
 jackMotifs <- function(web){
   gg <- igraph::graph_from_edgelist(as.matrix(web$trophic.links))
-  return(pfwim::calc_motif_stats(gg)[17:20])
+  return(calc_motif_stats(gg)[17:20])
 }
 
 # Network Stats Jack
