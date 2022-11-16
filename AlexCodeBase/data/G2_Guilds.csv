@@ -1,0 +1,22 @@
+Guild,clade,motility_detail,motility,motility_simple,tiering,tiering_simple,feeding,predator_type,feeding_simple,size,calcification,abundance_detail,abundance_simple
+Ammonite_3,ammonite,slow_swimmer,slow,motile,pelagic,pelagic,predator,micropredator,predator,large,moderate,295,very_common
+Ammonite_2,ammonite,slow_swimmer,slow,motile,pelagic,pelagic,predator,micropredator,predator,medium,moderate,813,very_common
+Ammonite_1,ammonite,slow_swimmer,slow,motile,pelagic,pelagic,predator,micropredator,predator,small,moderate,1,very_rare
+Belemnite_3,belemnite,fast_swimmer,fast,motile,pelagic,pelagic,predator,macropredator,predator,gigantic,moderate,15,rare
+Belemnite_1,belemnite,fast_swimmer,fast,motile,pelagic,pelagic,predator,macropredator,predator,large,moderate,14,rare
+Belemnite_2,belemnite,fast_swimmer,fast,motile,pelagic,pelagic,predator,macropredator,predator,very_large,moderate,33,fairly_common
+Bivalve_5,bivalve,slow_crawler,slow,motile,shallow_infaunal,infaunal,mining,,detritivore,small,moderate,1,very_rare
+Bivalve_17,bivalve,facultative_attached,facultative,motile,surficial,epifaunal,suspension,,suspension,small,moderate,1,very_rare
+Bivalve_18,bivalve,facultative_attached,facultative,motile,surficial,epifaunal,suspension,,suspension,tiny,moderate,7124,dominant
+Bivalve_20,bivalve,nonmotile_attached,nonmotile,nonmotile,surficial,epifaunal,suspension,,suspension,medium,moderate,7,rare
+Bivalve_21,bivalve,nonmotile_attached,nonmotile,nonmotile,surficial,epifaunal,suspension,,suspension,small,moderate,1,very_rare
+Bivalve_23,bivalve,nonmotile_unattached,nonmotile,nonmotile,surficial,epifaunal,suspension,,suspension,small,moderate,425,very_common
+Brachiopod_2,brachiopod,facultative_unattached,facultative,motile,shallow_infaunal,infaunal,suspension,,suspension,small,light,29,fairly_common
+Brachiopod_1,brachiopod,nonmotile_attached,nonmotile,nonmotile,surficial,epifaunal,suspension,,suspension,small,heavy,4,very_rare
+Crinoid_1,crinoid,facultative_attached,facultative,motile,erect,epifaunal,suspension,,suspension,medium,heavy,4,very_rare
+Fish_1,fish,fast_swimmer,fast,motile,pelagic,pelagic,predator,macropredator,predator,large,light,NA,NA
+Gastropod_1,gastropod,slow_crawler,slow,motile,surficial,epifaunal,grazer,,herbivore,tiny,moderate,4,very_rare
+Serpulid_1,serpulid,nonmotile_attached,nonmotile,nonmotile,surficial,epifaunal,suspension,,suspension,small,moderate,1,very_rare
+Soft_2,soft_indet,slow_crawler,slow,motile,surficial,epifaunal,grazer,,herbivore,small,light,NA,NA
+Soft_4,soft_indet,slow_crawler,slow,motile,shallow_infaunal,infaunal,mining,,detritivore,small,light,NA,NA
+BASAL NODE,primary,primary,primary,primary,primary,primary,primary,,primary,primary,primary,primary,primary
