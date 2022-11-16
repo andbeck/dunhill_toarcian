@@ -5,16 +5,15 @@
 library(pfwim)
 
 ##Load other packages that might be needed in this tutorial
-library(dplyr)
 library(tidyverse)
 library(igraph)
-library(ggplot2)
+source("Scripts/pfim_scripts.R")
 
 #Data frame listing taxon names and life habits. Taxon names must correspond to interaction data, and trait column names and levels must correspond to trait rules.
-ex_taxonlist<-read.csv("./data/G1_guilds.csv")
+ex_taxonlist<-read.csv("AlexCodeBase/A_data/G1_guilds.csv")
 
 #Four column dataframe listing rules for feasible resource-consumer trophic interactions. Follow column naming format when using your own files.
-ex_traitrules<-read.csv("./data/feeding_rules.csv")
+ex_traitrules<-read.csv("AlexCodeBase/A_data/feeding_rules.csv")
 
 ####Generating inferred webs----
 
@@ -31,7 +30,7 @@ inferred_web <- infer_edgelist(data=ex_taxonlist,
 )
 head(inferred_web)
 
-write.csv(inferred_web, "./outputs/interactions/G1 - pre-extinction guild inferred web.csv")
+# write.csv(inferred_web, "./outputs/interactions/G1 - pre-extinction guild inferred web.csv")
 
 
 ##If using categorical size data, drop some of the variables
@@ -52,6 +51,7 @@ inferred_web_longlist <- infer_edgelist(ex_taxonlist,
                                         return_full_matrix = TRUE #here indicating to return full matrix
 )
 head(inferred_web_longlist)
+
 #When returning the full matrix, no taxa or taxon pairs will be removed
 #NAs indicate that a rule wasn't met
 #"Pres_sum" indicates how many rules were met
@@ -64,7 +64,7 @@ head(inferred_web_longlist)
 graph_inferred_web<-igraph::graph_from_edgelist(inferred_web,directed=TRUE)
 
 #Make 3D food web objects
-fw3d<-make_3dfw(graph_inferred_web)
+fw3d<-igraph::make_3dfw(graph_inferred_web)
 
 #The plot might take a few seconds to load
 plot_3dfw(fw3d)
