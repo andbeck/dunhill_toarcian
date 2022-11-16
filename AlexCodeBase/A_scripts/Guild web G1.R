@@ -1,13 +1,12 @@
 ####Load key packages----
 
-##Load the pfwim package
-
-library(pfwim)
-
-##Load other packages that might be needed in this tutorial
 library(tidyverse)
 library(igraph)
+
+##Load the pfwim package
+
 source("Scripts/pfim_scripts.R")
+source("Scripts/fw_plotting_functions.R")
 
 #Data frame listing taxon names and life habits. Taxon names must correspond to interaction data, and trait column names and levels must correspond to trait rules.
 ex_taxonlist<-read.csv("AlexCodeBase/A_data/G1_guilds.csv")
@@ -64,7 +63,7 @@ head(inferred_web_longlist)
 graph_inferred_web<-igraph::graph_from_edgelist(inferred_web,directed=TRUE)
 
 #Make 3D food web objects
-fw3d<-igraph::make_3dfw(graph_inferred_web)
+fw3d<-make_3dfw(graph_inferred_web)
 
 #The plot might take a few seconds to load
 plot_3dfw(fw3d)
