@@ -1,173 +1,45 @@
 # plotting network stats through time
 # Toarcian
 
-stats <- read.csv("./data/metrics_time.csv")
+# libraries ----
+library(tidyverse)
+library(patchwork)
 
+# data and data subset to guild level  ----
+stats <- read_csv("AlexCodeBase/A_data/metrics_time.csv")
 guilds <- stats[grep(TRUE,stats[,"resolution"] == "guild"),]
 
-########## STRUCTURE
+# data management to create axis labels ----
+guilds <- guilds %>% 
+  mutate(time2 = case_when(
+    time == 1 ~ "pre-extinction",
+    time == 2 ~ "post-extinction",
+    time == 3 ~ "early recovery",
+    time == 4 ~ "late recovery"))
 
-# richness
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$taxa, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0,60), xlab="interval", ylab="Number of guilds")
-  axis(2)
-  axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
+# subsets of Structure metrics and Motif metrics ----
+guildsStructureDat <- guilds %>% 
+  select(time, time2, taxa, connectance, max_tl, generality, vulnerability) %>% 
+  pivot_longer(-c(time, time2), names_to = "Metric", values_to = "Value")
 
-# connectance
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$connectance, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.1,0.2), xlab="interval", ylab="Connectance (C)")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
+guildsMotifDat <- guilds %>% 
+  select(time, time2, s1, s2, s4, s5) %>% 
+  pivot_longer(-c(time, time2), names_to = "Metric", values_to = "Value")
 
-# max TL
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$max_tl, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(3,4), xlab="interval", ylab="Maximum trophic level (maxTL)")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
+# plots ----
+structPlot <- ggplot(guildsStructureDat, aes(x = time2, y =Value, group = Metric))+
+  geom_line()+
+  facet_wrap(~ Metric, scales = "free_y")+
+  labs(x = NULL, y = NULL, title = "A")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-# generality
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$generality, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.15,0.25), xlab="interval", ylab="Generality")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
+motifPlot <- ggplot(guildsMotifDat, aes(x = time2, y =Value, group = Metric))+
+  geom_line()+
+  facet_wrap(~ Metric, scales = "free_y")+
+  labs(x = NULL, y = NULL, title = "B")+
+  theme_bw()+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-# vulnerability
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$vulnerability, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.1,0.15), xlab="interval", ylab="Vulnerability")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-
-########## multiplot
-par(mfrow=c(3,2))
-# richness
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$taxa, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0,60), xlab="interval", ylab="Number of guilds")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 60, "A")
-
-# connectance
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$connectance, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.1,0.2), xlab="interval", ylab="Connectance (C)")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 0.2, "B")
-
-
-# max TL
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$max_tl, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(3,4), xlab="interval", ylab="Maximum trophic level (maxTL)")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 4, "C")
-
-# generality
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$generality, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.15,0.25), xlab="interval", ylab="Generality")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 0.25, "D")
-
-# vulnerability
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$vulnerability, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.1,0.15), xlab="interval", ylab="Vulnerability")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 0.15, "E")
-
-par(mfrow=c(1,1))
-
-############ MOTIFS
-
-# motif S1 (no. of linear chains/size)
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$s1, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.2,0.4), xlab="interval", ylab="S1: number of linear chains")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-
-# motif S2 (no. of omnivory motifs/size)
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$s2, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.1,0.4), xlab="interval", ylab="S2: omnivory")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-
-# motif S4 (no. of apparent competition motifs/size)
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$s4, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.35,1), xlab="interval", ylab="S4: apparent competition")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-
-# motif S5 (no. of direct competition motifs/size)
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$s5, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.15,0.35), xlab="interval", ylab="S5: direct competition")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-
-########## multiplot
-par(mfrow=c(2,2))
-
-# motif S1 (no. of linear chains/size)
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$s1, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.2,0.4), xlab="interval", ylab="S1: number of linear chains")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 0.4, "A")
-
-# motif S2 (no. of omnivory motifs/size)
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$s2, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.1,0.4), xlab="interval", ylab="S2: omnivory")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 0.4, "B")
-
-# motif S4 (no. of apparent competition motifs/size)
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$s4, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.35,1), xlab="interval", ylab="S4: apparent competition")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 1, "C")
-
-# motif S5 (no. of direct competition motifs/size)
-par(mar=c(5,5,1,2))
-plot(guilds$time, guilds$s5, type="l", lty=1, lwd=4, col=2, 
-     axes=FALSE, ylim=c(0.15,0.35), xlab="interval", ylab="S5: direct competition")
-axis(2)
-axis(1, at = 1:4, labels =c("pre-extinction", "post-extinction", "early recovery", "late recovery"))
-box()
-text(4, 0.35, "D")
-
-par(mfrow=c(1,1))
+# patchwork layout ----
+structPlot/motifPlot
