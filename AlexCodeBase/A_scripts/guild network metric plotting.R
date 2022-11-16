@@ -1,5 +1,6 @@
 # plotting network stats through time
 # Toarcian
+# Dunhill et al 2022
 
 # libraries ----
 library(tidyverse)
@@ -29,17 +30,22 @@ guildsMotifDat <- guilds %>%
 # plots ----
 structPlot <- ggplot(guildsStructureDat, aes(x = time2, y =Value, group = Metric))+
   geom_line()+
-  facet_wrap(~ Metric, scales = "free_y")+
-  labs(x = NULL, y = NULL, title = "A")+
+  facet_wrap(~ Metric, scales = "free_y", ncol = 1)+
+  labs(x = NULL, y = NULL)+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+
+structPlot
 
 motifPlot <- ggplot(guildsMotifDat, aes(x = time2, y =Value, group = Metric))+
   geom_line()+
-  facet_wrap(~ Metric, scales = "free_y")+
-  labs(x = NULL, y = NULL, title = "B")+
+  facet_wrap(~ Metric, scales = "free_y", ncol = 1)+
+  labs(x = NULL, y = NULL)+
   theme_bw()+
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
+motifPlot
+
+
 # patchwork layout ----
-structPlot/motifPlot
+#structPlot+motifPlot
