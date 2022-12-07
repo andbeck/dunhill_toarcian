@@ -160,7 +160,22 @@ nets <- mm %>% filter(metric != "TSS") %>%
 # motif metrics
 mots <- mm %>% filter(grepl("mot", metric))
 # True Skill metric
-TSSs <- mm %>% filter(metric == "TSS")
+TSSs <- mm %>% filter(metric == "TSS") %>% 
+  mutate(trait2 = case_when(
+    trait == "rand" ~ "Random",
+    trait == "size_b2s" ~ "Size (Large-Small)",
+    trait == "size_s2b" ~ "Size (Small-Big)",
+    trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
+    trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
+    trait == "mot_fn" ~ "Motility (fast-none)",
+    trait == "mot_nf" ~ "Motility (none-fast)",
+    trait == "calc_l2h" ~ "Calcified (low-high)",
+    trait == "calc_h2l" ~ "Calcified (high-low)",
+    trait == "gen_l2h" ~ "Generalism (low-high)",
+    trait == "gen_h2l" ~ "Generalism (high-low)",
+    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
+    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
+  ))
 
 # post (empirical) motif and network metrics
 post_nets <- postMetrics %>%
@@ -221,19 +236,23 @@ mot_labels <-  c(norm_mot_lin = "Linear Food Chain",
 #         strip.text.x = element_text(size = 5))+
 #   guides(fill = "none")
 # 
-# # TSS Only
-# TSS_graph <- ggplot(filter(mm, metric == "TSS"), 
-#                     aes(x = trait, y = meanVal, fill = trait))+
-#   geom_col()+
-#   ylab("TSS Score")+xlab("Sequence")+
-#   geom_errorbar(aes(ymin = meanVal - sdVal,
-#                     ymax = meanVal + sdVal),
-#                 width = 0, size = 0.25)+
-#   theme_bw()+
-#   theme(axis.text.x = element_text(angle = 90),
-#         strip.text.x = element_text(size = 5))+
-#   guides(fill = "none")
-# 
+# TSS Only
+TSS_graph <- ggplot(TSSs,
+                    aes(x = fct_reorder(trait2, meanVal), y = meanVal, fill = trait2))+
+  geom_col()+
+  ylab("TSS Score")+xlab("Sequence")+
+  geom_errorbar(aes(ymin = meanVal - sdVal,
+                    ymax = meanVal + sdVal),
+                width = 0, linewidth = 0.25)+
+  labs(x = NULL)+
+  theme_bw(base_size = 15)+
+  theme(axis.text.x = element_text(angle = 90),
+        strip.text.x = element_text(size = 5))+
+  guides(fill = "none")+
+  coord_flip()
+
+TSS_graph
+
 # ### barplot version 1 ----
 # TSS_graph/(net_plots+mot_plots)
 
