@@ -7,7 +7,13 @@ library(tidyverse)
 library(patchwork)
 
 # data and data subset to guild level  ----
+## this is andrew based data using GuildWebsBuildPlotAnalyse and calc_select_stats
 guilds <- read_csv("Data/metrics_time2.csv")
+
+## these are alex's original data
+## did not use calc_select_stats
+## this uses calc_network_stats 
+
 guilds2 <- read_csv("Data/metrics_time.csv") %>% filter(resolution == "guild") %>% 
   select(-resolution)
 
@@ -29,6 +35,7 @@ guilds <- guilds %>%
                                           "post-extinction",
                                           "early recovery",
                                           "late recovery")))
+
 
 # subsets of Structure metrics and Motif metrics ----
 guildsStructureDat <- guilds %>% 
@@ -52,6 +59,17 @@ guildsMotifDat <- guilds %>%
     Metric == "norm_mot_dir_comp" ~ "Competition"
   ))
 
+guildsMotifDat2 <- guilds2 %>% 
+  select(time, s1, s2, s4, s5) %>% 
+  pivot_longer(-c(time), names_to = "Metric", values_to = "Value") %>% 
+  mutate(Metric = case_when(
+    Metric == "s1" ~ "Linear Food Chain",
+    Metric == "s2" ~ "Omnivory",
+    Metric == "s4" ~ "Apparent Competition",
+    Metric == "s5" ~ "Competition"
+  ))
+
+
 # plots ----
 structPlot <- ggplot(guildsStructureDat, aes(x = time2, y =Value, group = Metric))+
   geom_line()+
@@ -70,6 +88,15 @@ motifPlot <- ggplot(guildsMotifDat, aes(x = time2, y =Value, group = Metric))+
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
 motifPlot
+
+motifPlot2 <- ggplot(guildsMotifDat2, aes(x = time, y =Value, group = Metric))+
+  geom_line()+
+  facet_wrap(~ Metric, scales = "free_y", ncol = 1)+
+  labs(x = NULL, y = NULL)+
+  theme_bw(base_size = 15)+
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+
+motifPlot2
 
 
 # patchwork layout ----
