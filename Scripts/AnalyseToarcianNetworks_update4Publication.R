@@ -273,7 +273,7 @@ diffDat <- bind_cols(arrange(mm, metric), refEst) %>%
   mutate(diffEst = meanVal-refEst) %>% 
   filter(metric !="TSS")
 
-# average difference by trait
+# average difference by trait ----
 diffMeans <- diffDat %>% 
   group_by(trait) %>% 
   summarise(
@@ -284,6 +284,7 @@ with(diffMeans, diffMeans[which.min(abs(meanDiff)),])
 
 ggplot(diffMeans, aes(x = reorder(trait, meanDiff), y = meanDiff))+
   geom_col()+
+  labs(x = "Scenario", y = "Mean Difference from 13 Metrics")+
   theme(axis.text.x = element_text(angle = 90))
 
  # 20% of max difference to draw boundary lines
