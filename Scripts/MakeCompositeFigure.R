@@ -13,5 +13,9 @@ source("Scripts/AnalyseToarcianNetworks_update4Publication.R")
 # motifPlot2
 source("Scripts/guild network metric plotting.R")
 
-# combine
-(TSS_graph + diffMeans13)/(structPlot+ plot_spacer() + motifPlot2)
+# combine ----
+## Vertical (using) ----
+(TSS_graph/diffMeans13)|(structPlot/motifPlot2)
+
+# ## Horizontal ----
+# (TSS_graph + diffMeans13)/(structPlot+ plot_spacer() + motifPlot2)

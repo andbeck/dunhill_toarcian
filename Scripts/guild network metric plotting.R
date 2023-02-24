@@ -42,12 +42,14 @@ guildsStructureDat <- guilds %>%
   select(time, time2, taxa, connectance, max_tl_std, sd_normalized_in_degree, sd_normalized_out_degree) %>% 
   pivot_longer(-c(time, time2), names_to = "Metric", values_to = "Value") %>% 
   mutate(Metric = case_when(
-    Metric == "taxa" ~ "a-Guild Richness",
-    Metric == "connectance" ~ "b-Connectance",
-    Metric == "max_tl_std" ~ "c-Max Trophic Chain Length",
-    Metric == "sd_normalized_in_degree" ~ "d-Generality",
-    Metric == 'sd_normalized_out_degree' ~ "e-Vulnerability"
-  ))
+    Metric == "taxa" ~ "Guild Richness",
+    Metric == "connectance" ~ "Connectance",
+    Metric == "max_tl_std" ~ "Max Trophic Chain Length",
+    Metric == "sd_normalized_in_degree" ~ "Generality",
+    Metric == 'sd_normalized_out_degree' ~ "Vulnerability"
+  )) %>% 
+  mutate(Metric = fct_relevel(Metric, "Guild Richness", "Connectance", "Max Trophic Chain Length",
+                              "Generality", "Vulnerability"))
 
 guildsMotifDat <- guilds %>% 
   select(time, time2, norm_mot_lin, norm_mot_omn, norm_mot_ap_comp, norm_mot_dir_comp) %>% 
