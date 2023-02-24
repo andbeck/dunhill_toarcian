@@ -67,37 +67,46 @@ guildsMotifDat2 <- guilds2 %>%
     Metric == "s2" ~ "Omnivory",
     Metric == "s4" ~ "Apparent Competition",
     Metric == "s5" ~ "Competition"
-  ))
+  )) %>% 
+  mutate(time2 = case_when(
+    time == 1 ~ "pre-extinction",
+    time == 2 ~ "post-extinction",
+    time == 3 ~ "early recovery",
+    time == 4 ~ "late recovery")) %>% 
+  mutate(time2 = factor(time2, levels = c("pre-extinction",
+                                          "post-extinction",
+                                          "early recovery",
+                                          "late recovery")))
 
 
 # plots ----
 structPlot <- ggplot(guildsStructureDat, aes(x = time2, y =Value, group = Metric))+
   geom_line()+
   facet_wrap(~ Metric, scales = "free_y", ncol = 1)+
-  labs(x = NULL, y = NULL)+
-  theme_bw(base_size = 15)+
+  labs(x = NULL, y = NULL, title = "(c)")+
+  theme_bw()+
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-structPlot
+# structPlot
 
-motifPlot <- ggplot(guildsMotifDat, aes(x = time2, y =Value, group = Metric))+
+# motifPlot <- ggplot(guildsMotifDat, aes(x = time2, y =Value, group = Metric))+
+#   geom_line()+
+#   facet_wrap(~ Metric, scales = "free_y", ncol = 1)+
+#   labs(x = NULL, y = NULL)+
+#   theme_bw(base_size = 15)+
+#   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
+# 
+# motifPlot
+
+motifPlot2 <- ggplot(guildsMotifDat2, aes(x = time2, y =Value, group = Metric))+
   geom_line()+
   facet_wrap(~ Metric, scales = "free_y", ncol = 1)+
-  labs(x = NULL, y = NULL)+
-  theme_bw(base_size = 15)+
+  labs(x = NULL, y = NULL, title = "(d)")+
+  theme_bw()+
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
 
-motifPlot
-
-motifPlot2 <- ggplot(guildsMotifDat2, aes(x = time, y =Value, group = Metric))+
-  geom_line()+
-  facet_wrap(~ Metric, scales = "free_y", ncol = 1)+
-  labs(x = NULL, y = NULL)+
-  theme_bw(base_size = 15)+
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.5))
-
-motifPlot2
+# motifPlot2
 
 
 # patchwork layout ----
-structPlot+motifPlot
+# structPlot+motifPlot

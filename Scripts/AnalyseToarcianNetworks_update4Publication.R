@@ -13,6 +13,7 @@
 library(cheddar)
 library(igraph)
 library(NetIndices)
+
 ## libraries for graph things ----
 library(tidyverse)
 library(ggrepel)
@@ -236,27 +237,27 @@ mot_labels <-  c(norm_mot_lin = "Linear Food Chain",
 #         strip.text.x = element_text(size = 5))+
 #   guides(fill = "none")
 # 
-# TSS Only
+
+# TSS Only - Graph (a) ----
 TSS_graph <- ggplot(TSSs,
-                    aes(x = fct_reorder(trait2, meanVal), y = meanVal, fill = trait2))+
+                    aes(x = fct_reorder(trait2, meanVal), y = meanVal))+
   geom_col()+
   ylab("TSS Score")+xlab("Sequence")+
   geom_errorbar(aes(ymin = meanVal - sdVal,
                     ymax = meanVal + sdVal),
-                width = 0, linewidth = 0.25)+
-  labs(x = NULL)+
+                width = 0)+
+  labs(x = NULL, title = "(a)")+
   theme_bw(base_size = 15)+
   theme(axis.text.x = element_text(angle = 90),
         strip.text.x = element_text(size = 5))+
   guides(fill = "none")+
   coord_flip()
 
-TSS_graph
+# TSS_graph
 
-# ### barplot version 1 ----
 # TSS_graph/(net_plots+mot_plots)
 
-## Data for Graph Format 2 and 3: difference to reference ----
+## Data for Graph (b): difference to reference ----
 
 ## generate differences from empirical ----
 
@@ -278,195 +279,220 @@ diffMeans <- diffDat %>%
   group_by(trait) %>% 
   summarise(
     meanDiff = abs(mean(diffEst))
-  )
+  ) %>% 
+  mutate(trait2 = case_when(
+    trait == "rand" ~ "Random",
+    trait == "size_b2s" ~ "Size (Large-Small)",
+    trait == "size_s2b" ~ "Size (Small-Big)",
+    trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
+    trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
+    trait == "mot_fn" ~ "Motility (fast-none)",
+    trait == "mot_nf" ~ "Motility (none-fast)",
+    trait == "calc_l2h" ~ "Calcified (low-high)",
+    trait == "calc_h2l" ~ "Calcified (high-low)",
+    trait == "gen_l2h" ~ "Generalism (low-high)",
+    trait == "gen_h2l" ~ "Generalism (high-low)",
+    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
+    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
+  ))
 
-with(diffMeans, diffMeans[which.min(abs(meanDiff)),])
+# confirm lowest
+# with(diffMeans, diffMeans[which.min(abs(meanDiff)),])
 
-ggplot(diffMeans, aes(x = reorder(trait, meanDiff), y = meanDiff))+
+# Plot
+diffMeans13 <- ggplot(diffMeans, aes(x = reorder(trait2, meanDiff), y = meanDiff))+
   geom_col()+
-  labs(x = "Scenario", y = "Mean Difference from 13 Metrics")+
-  theme(axis.text.x = element_text(angle = 90))
+  labs(x = "", y = "Mean Absolute Difference", title = '(b)')+
+  theme_bw(base_size = 15)+
+  theme(axis.text.x = element_text(angle = 90),
+        strip.text.x = element_text(size = 5))+
+  guides(fill = "none")+
+  coord_flip()
 
- # 20% of max difference to draw boundary lines
-diffBounds <- diffDat %>% 
-  group_by(metric) %>% 
-  summarise(
-    interval = 0.2*(max(abs(diffEst)))
-  )
+# diffMeans13
 
-# relabelling and filtering difference data for net stats
-diff_nets <- diffDat %>% filter(metric != "TSS") %>% 
-  filter(!grepl("mot", metric)) %>% 
-  mutate(trait2 = case_when(
-    trait == "rand" ~ "Random",
-    trait == "size_b2s" ~ "Size (Large-Small)",
-    trait == "size_s2b" ~ "Size (Small-Big)",
-    trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
-    trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
-    trait == "mot_fn" ~ "Motility (fast-none)",
-    trait == "mot_nf" ~ "Motility (none-fast)",
-    trait == "calc_l2h" ~ "Calcified (low-high)",
-    trait == "calc_h2l" ~ "Calcified (high-low)",
-    trait == "gen_l2h" ~ "Generalism (low-high)",
-    trait == "gen_h2l" ~ "Generalism (high-low)",
-    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
-    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
-  ))
+### NOT USED 
 
-# relabelling and filtering difference data for motif stats
-diff_mots <- diffDat %>% filter(grepl("mot", metric)) %>% 
-  mutate(trait2 = case_when(
-    trait == "rand" ~ "Random",
-    trait == "size_b2s" ~ "Size (Large-Small)",
-    trait == "size_s2b" ~ "Size (Small-Big)",
-    trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
-    trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
-    trait == "mot_fn" ~ "Motility (fast-none)",
-    trait == "mot_nf" ~ "Motility (none-fast)",
-    trait == "calc_l2h" ~ "Calcified (low-high)",
-    trait == "calc_h2l" ~ "Calcified (high-low)",
-    trait == "gen_l2h" ~ "Generalism (low-high)",
-    trait == "gen_h2l" ~ "Generalism (high-low)",
-    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
-    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
-  ))
-
-# boundaries for visualisation
-bounds_nets <- diffBounds %>% filter(metric != "TSS") %>% 
-  filter(!grepl("mot", metric))
-bounds_mots <- diffBounds %>% filter(grepl("mot", metric))
-
-
-# ### Plots Format 2 (not used) - difference barplots with boundaries ----
+# # 20% of max difference to draw boundary lines
+# diffBounds <- diffDat %>% 
+#   group_by(metric) %>% 
+#   summarise(
+#     interval = 0.2*(max(abs(diffEst)))
+#   )
 # 
-# # plot difference with 20% max difference area'd
-# diffPlot_nets <- ggplot(diff_nets, aes(x = trait, y = diffEst, 
-#                                        fill = trait))+
-#   geom_col()+
-#   geom_hline(data = bounds_nets, aes(yintercept = 0+interval), col = "blue")+
-#   geom_hline(data = bounds_nets, aes(yintercept = 0-interval), col = "blue")+
-#   facet_wrap(~metric, scales = "free_y", ncol = 3)+
+# # relabelling and filtering difference data for net stats
+# diff_nets <- diffDat %>% filter(metric != "TSS") %>% 
+#   filter(!grepl("mot", metric)) %>% 
+#   mutate(trait2 = case_when(
+#     trait == "rand" ~ "Random",
+#     trait == "size_b2s" ~ "Size (Large-Small)",
+#     trait == "size_s2b" ~ "Size (Small-Big)",
+#     trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
+#     trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
+#     trait == "mot_fn" ~ "Motility (fast-none)",
+#     trait == "mot_nf" ~ "Motility (none-fast)",
+#     trait == "calc_l2h" ~ "Calcified (low-high)",
+#     trait == "calc_h2l" ~ "Calcified (high-low)",
+#     trait == "gen_l2h" ~ "Generalism (low-high)",
+#     trait == "gen_h2l" ~ "Generalism (high-low)",
+#     trait == "vuln_l2h" ~ "Vulnerability (low-high)",
+#     trait == "vuln_h2l" ~ "Vulnerability (high-low)"
+#   ))
+# 
+# # relabelling and filtering difference data for motif stats
+# diff_mots <- diffDat %>% filter(grepl("mot", metric)) %>% 
+#   mutate(trait2 = case_when(
+#     trait == "rand" ~ "Random",
+#     trait == "size_b2s" ~ "Size (Large-Small)",
+#     trait == "size_s2b" ~ "Size (Small-Big)",
+#     trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
+#     trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
+#     trait == "mot_fn" ~ "Motility (fast-none)",
+#     trait == "mot_nf" ~ "Motility (none-fast)",
+#     trait == "calc_l2h" ~ "Calcified (low-high)",
+#     trait == "calc_h2l" ~ "Calcified (high-low)",
+#     trait == "gen_l2h" ~ "Generalism (low-high)",
+#     trait == "gen_h2l" ~ "Generalism (high-low)",
+#     trait == "vuln_l2h" ~ "Vulnerability (low-high)",
+#     trait == "vuln_h2l" ~ "Vulnerability (high-low)"
+#   ))
+# 
+# # boundaries for visualisation
+# bounds_nets <- diffBounds %>% filter(metric != "TSS") %>% 
+#   filter(!grepl("mot", metric))
+# bounds_mots <- diffBounds %>% filter(grepl("mot", metric))
+# 
+# 
+# # ### Plots Format 2 (not used) - difference barplots with boundaries ----
+# # 
+# # # plot difference with 20% max difference area'd
+# # diffPlot_nets <- ggplot(diff_nets, aes(x = trait, y = diffEst, 
+# #                                        fill = trait))+
+# #   geom_col()+
+# #   geom_hline(data = bounds_nets, aes(yintercept = 0+interval), col = "blue")+
+# #   geom_hline(data = bounds_nets, aes(yintercept = 0-interval), col = "blue")+
+# #   facet_wrap(~metric, scales = "free_y", ncol = 3)+
+# #   theme_bw()+
+# #   theme(axis.text.x = element_text(angle = 90))+
+# #   guides(fill = "none")
+# # 
+# # diffPlot_mots <- ggplot(diff_mots, aes(x = trait, y = diffEst, 
+# #                                        fill = trait))+
+# #   geom_col()+
+# #   geom_hline(data = bounds_mots, aes(yintercept = 0+interval), col = "blue")+
+# #   geom_hline(data = bounds_mots, aes(yintercept = 0-interval), col = "blue")+
+# #   facet_wrap(~metric, scales = "free_y", ncol = 2)+
+# #   theme(axis.text.x = element_text(angle = 90))+
+# #   guides(fill = "none")
+# # 
+# # TSS_graph+(diffPlot_nets/diffPlot_mots)
+# 
+# 
+# ## Plots version 3 (used) - Williams and Martinez Style ----
+# # plot differences from reference among sequences as dots 
+# # for each metric and identify closest trait order for each metric
+# 
+# ### filter and select to find network metric and sequence for closest ----
+# nets_close <- diff_nets %>% 
+#   group_by(metric) %>% 
+#   filter(abs(diffEst - 0) == min(abs(diffEst - 0))) %>% 
+#   select(metric, trait, trait2)
+# 
+# ### filter and select to find motif and sequence for closest ----
+# mots_close <- diff_mots %>% group_by(metric) %>% 
+#   filter(abs(diffEst - 0) == min(abs(diffEst - 0)))  %>% 
+#   select(metric, trait, trait2)
+# 
+# ### create closest combined data frame ----
+# # manage labelling
+# all_close <- bind_rows(nets_close, mots_close)
+# all_diffs <- bind_rows(diff_nets, diff_mots) %>% 
+#   mutate(mets = factor(mets, levels = 
+#                          c("connectance", "max_tl_std","mean_tl_std","soi_std",
+#                            "diameter","mean_norm_btw",
+#                            "mean_normalized_degree", "sd_normalized_in_degree",
+#                            "sd_normalized_out_degree",
+#                            "norm_mot_ap_comp", "norm_mot_dir_comp",
+#                            "norm_mot_lin", "norm_mot_omn")))
+# 
+# xlabs <- c("Connectance", "Max Trophic Level","Mean Trophic Level", "Omnivory Index",
+#            "Diameter","Betweeness", "Degree", "In Degree","Out Degree", 
+#            "Apparent Competition Motif","Direct Competition Motif",
+#            "Linear Food Chain Motif","Omnivory Motif")
+# 
+# ### Version 3 Plot (used) ----
+# ggplot(all_diffs, aes(x = mets, y = diffEst, 
+#                       group = trait2, colour = trait2))+
+#   geom_jitter(height = 0, width = 0.1, size =2, alpha = 0.75)+
+#   scale_x_discrete(labels = xlabs)+
+#   labs(x = "", y = "Difference from Empirical", 
+#        colour = "Sequence")+
+#   geom_text(data = all_close, aes(x = metric, y  = 0.5, 
+#                                   label = trait2),
+#             inherit.aes = FALSE, size = 2, angle = 45, 
+#             fontface = "italic")+
+#   geom_hline(yintercept = 0)+
 #   theme_bw()+
-#   theme(axis.text.x = element_text(angle = 90))+
-#   guides(fill = "none")
+#   theme(axis.text.x = element_text(angle = 90, face = "bold"),
+#         legend.position = 'top',
+#         legend.title = element_blank())
 # 
-# diffPlot_mots <- ggplot(diff_mots, aes(x = trait, y = diffEst, 
-#                                        fill = trait))+
-#   geom_col()+
-#   geom_hline(data = bounds_mots, aes(yintercept = 0+interval), col = "blue")+
-#   geom_hline(data = bounds_mots, aes(yintercept = 0-interval), col = "blue")+
-#   facet_wrap(~metric, scales = "free_y", ncol = 2)+
-#   theme(axis.text.x = element_text(angle = 90))+
-#   guides(fill = "none")
 # 
-# TSS_graph+(diffPlot_nets/diffPlot_mots)
-
-
-## Plots version 3 (used) - Williams and Martinez Style ----
-# plot differences from reference among sequences as dots 
-# for each metric and identify closest trait order for each metric
-
-### filter and select to find network metric and sequence for closest ----
-nets_close <- diff_nets %>% 
-  group_by(metric) %>% 
-  filter(abs(diffEst - 0) == min(abs(diffEst - 0))) %>% 
-  select(metric, trait, trait2)
-
-### filter and select to find motif and sequence for closest ----
-mots_close <- diff_mots %>% group_by(metric) %>% 
-  filter(abs(diffEst - 0) == min(abs(diffEst - 0)))  %>% 
-  select(metric, trait, trait2)
-
-### create closest combined data frame ----
-# manage labelling
-all_close <- bind_rows(nets_close, mots_close)
-all_diffs <- bind_rows(diff_nets, diff_mots) %>% 
-  mutate(mets = factor(mets, levels = 
-                         c("connectance", "max_tl_std","mean_tl_std","soi_std",
-                           "diameter","mean_norm_btw",
-                           "mean_normalized_degree", "sd_normalized_in_degree",
-                           "sd_normalized_out_degree",
-                           "norm_mot_ap_comp", "norm_mot_dir_comp",
-                           "norm_mot_lin", "norm_mot_omn")))
-
-xlabs <- c("Connectance", "Max Trophic Level","Mean Trophic Level", "Omnivory Index",
-           "Diameter","Betweeness", "Degree", "In Degree","Out Degree", 
-           "Apparent Competition Motif","Direct Competition Motif",
-           "Linear Food Chain Motif","Omnivory Motif")
-
-### Version 3 Plot (used) ----
-ggplot(all_diffs, aes(x = mets, y = diffEst, 
-                      group = trait2, colour = trait2))+
-  geom_jitter(height = 0, width = 0.1, size =2, alpha = 0.75)+
-  scale_x_discrete(labels = xlabs)+
-  labs(x = "", y = "Difference from Empirical", 
-       colour = "Sequence")+
-  geom_text(data = all_close, aes(x = metric, y  = 0.5, 
-                                  label = trait2),
-            inherit.aes = FALSE, size = 2, angle = 45, 
-            fontface = "italic")+
-  geom_hline(yintercept = 0)+
-  theme_bw()+
-  theme(axis.text.x = element_text(angle = 90, face = "bold"),
-        legend.position = 'top',
-        legend.title = element_blank())
-
-
-## Create Table of closest sequence for each metric ----
-
-# max TSS score
-TSS_res <- mm %>% filter(metric == "TSS") %>% 
-  filter(meanVal == max(meanVal)) %>% 
-  select(metric, trait)
-
-# closest metrics
-nets_res <- diff_nets %>% 
-  group_by(metric) %>% 
-  filter(abs(diffEst - 0) == min(abs(diffEst - 0))) %>% 
-  select(metric, trait)
-
-# closests motifs
-mots_res <- diff_mots %>% group_by(metric) %>% 
-  filter(abs(diffEst - 0) == min(abs(diffEst - 0)))  %>% 
-  select(metric, trait)
-
-#combine them
-out_res <- bind_rows( nets_res, mots_res)  %>% 
-  filter(metric %in% c("connectance", "max_tl",
-                       "sd_normalized_in_degree",
-                       "sd_normalized_out_degree",
-                       "norm_mot_lin",
-                       "norm_mot_omn",
-                       "norm_mot_ap_comp",
-                       "norm_mot_dir_comp"
-  )) %>% 
-  mutate(trait2 = case_when(
-    trait == "rand" ~ "Random",
-    trait == "size_b2s" ~ "Size (Large-Small)",
-    trait == "size_s2b" ~ "Size (Small-Big)",
-    trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
-    trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
-    trait == "mot_fn" ~ "Motility (fast-none)",
-    trait == "mot_nf" ~ "Motility (none-fast)",
-    trait == "calc_l2h" ~ "Calcified (low-high)",
-    trait == "calc_h2l" ~ "Calcified (high-low)",
-    trait == "gen_l2h" ~ "Generalism (low-high)",
-    trait == "gen_h2l" ~ "Generalism (high-low)",
-    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
-    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
-  ))
-
-out_res
-
-# generate table and write out which trait sequence is closest for each metric ----
-# and how many tmes particular trait sequences are closest
-
-out_res_report <- with(out_res, table(trait2)) %>% data.frame() %>% 
-  filter(Freq>0) %>%
-  arrange(desc(Freq))
-
-out_res
-out_res_report
+# ## Create Table of closest sequence for each metric ----
+# 
+# # max TSS score
+# TSS_res <- mm %>% filter(metric == "TSS") %>% 
+#   filter(meanVal == max(meanVal)) %>% 
+#   select(metric, trait)
+# 
+# # closest metrics
+# nets_res <- diff_nets %>% 
+#   group_by(metric) %>% 
+#   filter(abs(diffEst - 0) == min(abs(diffEst - 0))) %>% 
+#   select(metric, trait)
+# 
+# # closests motifs
+# mots_res <- diff_mots %>% group_by(metric) %>% 
+#   filter(abs(diffEst - 0) == min(abs(diffEst - 0)))  %>% 
+#   select(metric, trait)
+# 
+# #combine them
+# out_res <- bind_rows( nets_res, mots_res)  %>% 
+#   filter(metric %in% c("connectance", "max_tl",
+#                        "sd_normalized_in_degree",
+#                        "sd_normalized_out_degree",
+#                        "norm_mot_lin",
+#                        "norm_mot_omn",
+#                        "norm_mot_ap_comp",
+#                        "norm_mot_dir_comp"
+#   )) %>% 
+#   mutate(trait2 = case_when(
+#     trait == "rand" ~ "Random",
+#     trait == "size_b2s" ~ "Size (Large-Small)",
+#     trait == "size_s2b" ~ "Size (Small-Big)",
+#     trait == "tier_i2p" ~ "Tiering (infaunal-pelagic)",
+#     trait == "tier_p2i" ~ "Tiering (pelagic-infaunal)",
+#     trait == "mot_fn" ~ "Motility (fast-none)",
+#     trait == "mot_nf" ~ "Motility (none-fast)",
+#     trait == "calc_l2h" ~ "Calcified (low-high)",
+#     trait == "calc_h2l" ~ "Calcified (high-low)",
+#     trait == "gen_l2h" ~ "Generalism (low-high)",
+#     trait == "gen_h2l" ~ "Generalism (high-low)",
+#     trait == "vuln_l2h" ~ "Vulnerability (low-high)",
+#     trait == "vuln_h2l" ~ "Vulnerability (high-low)"
+#   ))
+# 
+# out_res
+# 
+# # generate table and write out which trait sequence is closest for each metric ----
+# # and how many tmes particular trait sequences are closest
+# 
+# out_res_report <- with(out_res, table(trait2)) %>% data.frame() %>% 
+#   filter(Freq>0) %>%
+#   arrange(desc(Freq))
+# 
+# out_res
+# out_res_report
 
 # # uncomment to write
 # write_csv(out_res, file = "metric-sequence_association.csv")
