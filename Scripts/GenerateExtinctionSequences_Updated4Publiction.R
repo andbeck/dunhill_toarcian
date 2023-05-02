@@ -146,7 +146,9 @@ generate_seq <- function(extinctionOrder = randOrd){
   # collection zone for the final webs with 21 species
   SetOfWebs <- list()
   ExtinctionSequence <- list()
-
+  Primary <- list()
+  Secondary <- list()
+  
   # loop first over reps
   set.seed(128)
 
@@ -159,6 +161,7 @@ generate_seq <- function(extinctionOrder = randOrd){
     # collecting the webs as species go extinct
     collect <- list()
     es <- vector()
+    primaries <- vector()
 
     # push to near full extinctoion,
     # go back and get the point at which it is 21.
@@ -178,12 +181,14 @@ generate_seq <- function(extinctionOrder = randOrd){
       # This has the effect of propagating extinctions though the community - 
       # all consumers that are ultimately dependent upon all species in ‘remove’, 
       # and upon no other nodes (except themselves), will be removed.
+      primaries[i] <- orderExt[next_idx] 
       out <- RemoveNodes(tmp_web, remove = orderExt[next_idx], method = 'cascade')
 
       # add the web to the collection list (will generate the node ID below)
       collect[[i]] <- out
       es[i] <- length(NPS(out)$node)
       tmp_web <- out
+      
     }
 
     # from that sequence, collect the web at 21 species
@@ -198,10 +203,27 @@ generate_seq <- function(extinctionOrder = randOrd){
 
     # collect webs with 21 species to here
     SetOfWebs[[j]] <- outWeb[[1]]
+    
+    # primary and secondary listing
+    if(is.null(outWeb[[1]])){
+      primary = NA
+      secondary = NA
+    } else
+    {
+      start <- NPS(preCom_Guild)$node
+      primary <- primaries
+      intermediate <- start[!(start %in% primary)]
+      end <- NPS(outWeb[[1]])$node
+      secondary <- start[!(start %in% primary)][!(intermediate %in% end)]
+
+    }
+
+    Primary[[j]] <- primary
+    Secondary[[j]] <- secondary
 
   }
   # the output from the function is a list of webs and extinction sequences
-  return(list(SetOfWebs, ExtinctionSequence))
+  return(list(SetOfWebs, Primary, Secondary, ExtinctionSequence))
 }
 
 # Apply generate_seq() function to ALL OF THE EXTINCTION ORDERS defined above ----
