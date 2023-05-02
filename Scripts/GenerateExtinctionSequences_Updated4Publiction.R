@@ -175,7 +175,7 @@ generate_seq <- function(extinctionOrder = randOrd){
 
       # now do the iterative removal with possible secondary
       # using cascade method in cheddar: a multistep version of ‘secondary’ is applied. 
-      # This has the effect of propogating extinctions though the community - 
+      # This has the effect of propagating extinctions though the community - 
       # all consumers that are ultimately dependent upon all species in ‘remove’, 
       # and upon no other nodes (except themselves), will be removed.
       out <- RemoveNodes(tmp_web, remove = orderExt[next_idx], method = 'cascade')
