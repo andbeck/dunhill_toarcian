@@ -256,6 +256,19 @@ genExt_h2l <- generate_seq(extinctionOrder = genOrd_h2l)
 calcExt_h2l <- generate_seq(extinctionOrder = calcOrd_h2l)
 calcExt_l2h <- generate_seq(extinctionOrder = calcOrd_l2h)
 
+## Check secondary extinction identities
+sort(table(unlist(tierExt_i2p[[3]])), decreasing = TRUE)
+sort(table(unlist(genExt_l2h[[3]])), decreasing = TRUE)
+sort(table(unlist(genExt_h2l[[3]])), decreasing = TRUE)
+
+par(mar = c(10,4,2,2), mfrow = c(1,3))
+plot(sort(table(unlist(tierExt_i2p[[3]])), decreasing = TRUE), las = 2, ylab = "count")
+title("Tiering Infaunal to Pelagic")
+plot(sort(table(unlist(genExt_l2h[[3]])), decreasing = TRUE), las = 2, ylab = "count")
+title("Generalism Low to High")
+plot(sort(table(unlist(genExt_h2l[[3]])), decreasing = TRUE), las = 2, ylab = "count")
+title("Generalism High to Low")
+
 # remove webs where there was not 21 species network (labelled NULL in the sims) ----
 # done for all extinction sequences
 
