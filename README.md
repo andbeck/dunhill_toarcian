@@ -1,5 +1,5 @@
 ## dunhill_toarcian
-Code to Reproduce Dunhill et al analysis of secondary extinctions in Toarcian food webs.
+Code to Reproduce Dunhill et al analysis of secondary extinctions in Toarcian food webs, submitted to Nature Ecology and Evolution for review.
 
 There are two sets of analysis (2 x scripts folders) and one shared data folder
 
