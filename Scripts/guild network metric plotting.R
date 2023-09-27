@@ -13,13 +13,16 @@ guilds <- read_csv("Data/metrics_time2.csv")
 ## these are alex's original data
 ## did not use calc_select_stats
 ## this uses calc_network_stats 
+## provides gen and vuln data
 
 guilds2 <- read_csv("Data/metrics_time.csv") %>% filter(resolution == "guild") %>% 
   select(-resolution)
 
+# checking
 colnames(guilds)
 colnames(guilds2)
 
+#checking
 guilds %>% select(sd_normalized_in_degree, sd_normalized_out_degree)
 guilds2 %>% select(generality, vulnerability)
 
