@@ -6,6 +6,7 @@ library(rgl)
 
 # functions needed to make food webs and plot them
 source("Scripts/pfim_scripts.R")
+source("Scripts/robustness_gradient.R")
 
 # Data sources ----
 # Data frame listing taxon names and life habits. 
@@ -32,14 +33,14 @@ taxa_g4 <- dim(ex_taxonlist_g4)[1]
 
 ##Infer the food web using g1 ----
 inferred_web_g1 <- infer_edgelist(data=ex_taxonlist_g1,
-                               col_taxon = "Guild", #indicate column containing taxon names
-                               #col_num_size = "size_select", #if using a numerical prey-pred size rule indicate column containing numerical size values
-                               cat_combo_list = ex_traitrules, #point to dataframe containing trait rules
-                               cat_trait_types = NULL, #if you only want to use a subset of life habit columns enter column names as vector otherwise NULL
-                               #num_size_rule = function(res_size, con_size) {ifelse(res_size <= con_size, 1, 0)}, #function defining pred-prey size rule, here as long as predator is equal to or larger than prey then an interaction is feasible
-                               certainty_req = "all", #state whether an interaction must meet all trait rules (e.g., feeding, motility, tiering, and size) or whether only a subset is require (e.g., if you input "2" then a taxon pair only has to meet feeding+motility or tiering+motility, but not all 4 feeding+motility+tiering+size)
-                               return_full_matrix = FALSE, #indicate whether the function should return all taxon pairs with a value indicating how many trait rules were met, or whether the function should just return inferred interactions as an edgelist
-                               print_dropped_taxa=TRUE #Print names of any taxa that have been removed
+                                  col_taxon = "Guild", #indicate column containing taxon names
+                                  #col_num_size = "size_select", #if using a numerical prey-pred size rule indicate column containing numerical size values
+                                  cat_combo_list = ex_traitrules, #point to dataframe containing trait rules
+                                  cat_trait_types = NULL, #if you only want to use a subset of life habit columns enter column names as vector otherwise NULL
+                                  #num_size_rule = function(res_size, con_size) {ifelse(res_size <= con_size, 1, 0)}, #function defining pred-prey size rule, here as long as predator is equal to or larger than prey then an interaction is feasible
+                                  certainty_req = "all", #state whether an interaction must meet all trait rules (e.g., feeding, motility, tiering, and size) or whether only a subset is require (e.g., if you input "2" then a taxon pair only has to meet feeding+motility or tiering+motility, but not all 4 feeding+motility+tiering+size)
+                                  return_full_matrix = FALSE, #indicate whether the function should return all taxon pairs with a value indicating how many trait rules were met, or whether the function should just return inferred interactions as an edgelist
+                                  print_dropped_taxa=TRUE #Print names of any taxa that have been removed
 )
 
 ##Infer the food web using g2 ----
@@ -78,13 +79,6 @@ inferred_web_g4 <- infer_edgelist(data=ex_taxonlist_g4,
                                   print_dropped_taxa=TRUE #Print names of any taxa that have been removed
 )
 
-# write Guild network data to files ----
-
-# these files exist in the Data folder already.
-# write_csv(inferred_web, "Data/G1_Guilds.csv")
-# write_csv(inferred_web, "Data/G2_Guilds.csv")
-# write_csv(inferred_web, "Data/G3_Guilds.csv")
-# write_csv(inferred_web, "Data/G4_Guilds.csv")
 
 # Plotting food webs----
 
@@ -103,34 +97,26 @@ fw3d_g2 <- make_3dfw(graph_inferred_web_g2)
 fw3d_g3 <- make_3dfw(graph_inferred_web_g3)
 fw3d_g4 <- make_3dfw(graph_inferred_web_g4)
 
-## The plot might take a few seconds to load ----
-# this uses the rgl package functionality
-plot_3dfw(fw3d_g1)
-plot_3dfw(fw3d_g2)
-plot_3dfw(fw3d_g3)
-plot_3dfw(fw3d_g4)
+## SECONDARY EXTINCTION ----
+g1_graph <- graph_from_edgelist(inferred_web_g1)
+g2_graph <- graph_from_edgelist(inferred_web_g2)
+g3_graph <- graph_from_edgelist(inferred_web_g3)
+g4_graph <- graph_from_edgelist(inferred_web_g4)
 
-# Analyzing inferred webs ----
+g1_rob <- robustness_gradient(g1_graph, spread = c(10,50,90))
+g2_rob <- robustness_gradient(g2_graph, spread = c(10,50,90))
+g3_rob <- robustness_gradient(g3_graph, spread = c(10,50,90))
+g4_rob <- robustness_gradient(g4_graph, spread = c(10,50,90))
 
-## Calculate selected stats for Toarcian study ----
+webfac = factor(c("Pre","Post","Early Rec","Late Rec"), 
+                levels = c("Pre","Post","Early Rec","Late Rec"))
 
-# calc_select_stats provides 10 network metrics and 4 motif estimates
+df_rob <- data.frame(rbind(g1_rob, g2_rob, g3_rob, g4_rob)) %>% 
+  mutate(web = rep(webfac, each = 3))
 
-toarcian_stats_g1<-calc_select_stats(graph_inferred_web_g1)
-toarcian_stats_g2<-calc_select_stats(graph_inferred_web_g2)
-toarcian_stats_g3<-calc_select_stats(graph_inferred_web_g3)
-toarcian_stats_g4<-calc_select_stats(graph_inferred_web_g4)
-
-## collect the stats for plotting ----
-net_mot_Stats <- bind_cols(time = c(1,2,3,4),
-                           taxa = c(taxa_g1, taxa_g2, taxa_g3, taxa_g4),
-                      bind_rows(toarcian_stats_g1,
-                                toarcian_stats_g2,
-                                toarcian_stats_g3,
-                                toarcian_stats_g4))
-  
-## write the csv file for plotting ----
-# this file has been written to the Data folder already.
-# write_csv(net_mot_Stats, "Data/metrics_time2.csv")
-
-
+ggplot(df_rob, aes(x = web, y = 1-robustness, 
+                   group = perc_loss, colour = factor(perc_loss)))+
+  geom_line()+
+  facet_wrap(~perc_loss)+
+  theme(axis.text.x = element_text(angle = 90))
+         
