@@ -113,10 +113,12 @@ webfac = factor(c("Pre","Post","Early Rec","Late Rec"),
 
 df_rob <- data.frame(rbind(g1_rob, g2_rob, g3_rob, g4_rob)) %>% 
   mutate(web = rep(webfac, each = 3))
+df_ref <- tibble(perc_loss = as.character(unique(df_rob$perc_loss)), val = c(0.1, 0.5, 0.9))
 
-ggplot(df_rob, aes(x = web, y = 1-robustness, 
+ggplot(df_rob, aes(x = web, y = robustness, 
                    group = perc_loss, colour = factor(perc_loss)))+
   geom_line()+
   facet_wrap(~perc_loss)+
+  geom_hline(data = df_ref, aes(yintercept = val))+
   theme(axis.text.x = element_text(angle = 90))
          
