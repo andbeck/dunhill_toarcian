@@ -3,6 +3,8 @@ library(tidyverse)
 library(igraph)
 library(rgl)
 
+library(future.apply)
+plan(multisession, workers = 4)
 
 # functions needed to make food webs and plot them
 source("Scripts/pfim_scripts.R")
@@ -103,22 +105,75 @@ g2_graph <- graph_from_edgelist(inferred_web_g2)
 g3_graph <- graph_from_edgelist(inferred_web_g3)
 g4_graph <- graph_from_edgelist(inferred_web_g4)
 
-g1_rob <- robustness_gradient(g1_graph, spread = c(10,50,90))
-g2_rob <- robustness_gradient(g2_graph, spread = c(10,50,90))
-g3_rob <- robustness_gradient(g3_graph, spread = c(10,50,90))
-g4_rob <- robustness_gradient(g4_graph, spread = c(10,50,90))
 
-webfac = factor(c("Pre","Post","Early Rec","Late Rec"), 
-                levels = c("Pre","Post","Early Rec","Late Rec"))
+# define spread of losses
+spread <- seq(from = 1, to = 99, by = 0.5)
 
-df_rob <- data.frame(rbind(g1_rob, g2_rob, g3_rob, g4_rob)) %>% 
-  mutate(web = rep(webfac, each = 3))
-df_ref <- tibble(perc_loss = as.character(unique(df_rob$perc_loss)), val = c(0.1, 0.5, 0.9))
+# use replicate on each web to get 100 random starts 
+# and sequences for each
+# perc_loss value
+# run on 6 (or whatever above) cores using future_apply 
+# package (3 times faster)
 
-ggplot(df_rob, aes(x = web, y = robustness, 
-                   group = perc_loss, colour = factor(perc_loss)))+
-  geom_line()+
-  facet_wrap(~perc_loss)+
-  geom_hline(data = df_ref, aes(yintercept = val))+
-  theme(axis.text.x = element_text(angle = 90))
-         
+rob_g1 <- future_replicate(500, 
+                  robustness_gradient(g1_graph, spread = spread), 
+                  simplify = FALSE)
+
+rob_g2 <- future_replicate(500, 
+                         robustness_gradient(g2_graph, spread = spread), 
+                         simplify = FALSE)
+
+rob_g3 <- future_replicate(500, 
+                         robustness_gradient(g3_graph, spread = spread), 
+                         simplify = FALSE)
+
+rob_g4 <- future_replicate(500, 
+                         robustness_gradient(g4_graph, spread = spread), 
+                         simplify = FALSE)
+
+
+# bind the list elements into a dataframe
+# group by perc_loss value
+# take the mean to plot
+
+ll <- list(rob_g1, rob_g2, rob_g3, rob_g4)
+
+out_g1 <- do.call("rbind", rob_g1) |> 
+  data.frame() |> 
+  group_by(perc_loss) |> 
+  summarise(
+    meanRob = mean(robustness)
+  )
+
+out_g2 <- do.call("rbind", rob_g2) |> 
+  data.frame() |> 
+  group_by(perc_loss) |> 
+  summarise(
+    meanRob = mean(robustness)
+  )
+
+out_g3 <- do.call("rbind", rob_g3) |> 
+  data.frame() |> 
+  group_by(perc_loss) |> 
+  summarise(
+    meanRob = mean(robustness)
+  )
+
+out_g4 <- do.call("rbind", rob_g4) |> 
+  data.frame() |> 
+  group_by(perc_loss) |> 
+  summarise(
+    meanRob = mean(robustness)
+  )
+
+net = factor(c("pre", "post", "early", "late"),
+             levels = c("pre", "post", "early", "late"))
+
+all_rob <- bind_rows(out_g1, out_g2,
+                      out_g3, out_g4) |> 
+  mutate(net = rep(net,each = 99))
+
+# plot them
+ggplot(all_rob, aes(x = perc_loss, y = meanRob, col = net))+
+  geom_line()+geom_smooth()
+  
