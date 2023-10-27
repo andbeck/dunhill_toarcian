@@ -9,7 +9,11 @@ load("robustnessMeans_500_0.5spread.Rdata")
 
 # plot them
 ggplot(all_rob, aes(x = perc_loss, y = meanRob, col = net))+
-  geom_line()+geom_smooth()
+  geom_line()+geom_smooth(linewidth = 0.5)+
+  labs(x = "Perecent Primary Extinctin",
+       y = "Mean Robustness (n = 500)")+
+  guides(color=guide_legend("Network"))+
+  theme_bw(base_size = 12)
 
 # # Robustness Analysis ----------
 # 
