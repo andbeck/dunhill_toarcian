@@ -136,7 +136,7 @@ rob_g4 <- future_replicate(500,
 # group by perc_loss value
 # take the mean to plot
 
-ll <- list(rob_g1, rob_g2, rob_g3, rob_g4)
+#ll <- list(rob_g1, rob_g2, rob_g3, rob_g4)
 
 out_g1 <- do.call("rbind", rob_g1) |> 
   data.frame() |> 
@@ -176,4 +176,8 @@ all_rob <- bind_rows(out_g1, out_g2,
 # plot them
 ggplot(all_rob, aes(x = perc_loss, y = meanRob, col = net))+
   geom_line()+geom_smooth()
+
+## save the data
+save(out_g1, out_g2, out_g3, out_g4,
+     file = "robustnessMeans_500_0.1spread.Rdata")
   
