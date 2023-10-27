@@ -13,6 +13,8 @@ ggplot(all_rob, aes(x = perc_loss, y = meanRob, col = net))+
 
 # # Robustness Analysis ----------
 # 
+# Takes a few hours to generate the replicate robusteness data
+#
 # library(future.apply)
 # plan(multisession, workers = 4)
 # 
