@@ -8,9 +8,10 @@ library(future.apply)
 load("robustnessMeans_500_0.5spread.Rdata")
 
 # plot them
+# Rx primary leads to y-axis total loss
 ggplot(all_rob, aes(x = perc_loss, y = meanRob, col = net))+
   geom_line()+geom_smooth(linewidth = 0.5)+
-  labs(x = "Perecent Primary Extinctin",
+  labs(x = "Perecent Primary Extinction",
        y = "Mean Robustness (n = 500)")+
   guides(color=guide_legend("Network"))+
   theme_bw(base_size = 12)
