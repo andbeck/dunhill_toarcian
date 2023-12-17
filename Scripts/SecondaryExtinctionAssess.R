@@ -7,12 +7,40 @@ library(future.apply)
 # robustness data 
 load("robustnessMeans_500_0.5spread.Rdata")
 
+perc_loss_0 <- data.frame(
+  perc_loss = 0, meanRob = 1.0, net = "pre"
+)
+
 # plot them
-# Rx primary leads to y-axis total loss
-ggplot(all_rob, aes(x = perc_loss, y = meanRob, col = net))+
+
+preOnly <- all_rob |> 
+  filter(net == 'pre') |> 
+  bind_rows(perc_loss_0)
+
+tail(preOnly)
+
+ggplot(preOnly, aes(x = perc_loss/100, y = meanRob, col = net))+
   geom_line()+geom_smooth(linewidth = 0.5)+
   labs(x = "Perecent Primary Extinction",
-       y = "Mean Robustness (n = 500)")+
+       y = "Robustness (% Community Remaining; n = 500)")+
+  geom_abline(slope = -1, intercept = 1, linetype = 'dotted')
+
+ggplot(preOnly, aes(x = meanRob))+
+  geom_histogram()
+
+# Rx primary leads to y-axis total loss
+# perc_loss_0_all <- data.frame(
+  perc_loss = 0, meanRob = 1.0, net = c("pre","post", "early", "late"))
+
+# all_rob <- all_rob |> bind_rows(perc_loss_0_all)
+
+
+ggplot(all_rob, aes(x = perc_loss/100, y = meanRob, col = net))+
+  geom_line()+geom_smooth(linewidth = 0.5)+
+  ylim(0,1)+
+  labs(x = "Perecent Primary Extinction",
+       y = "Robustness (% Community Remaining; n = 500)")+
+  geom_abline(slope = -1, intercept = 1, linetype = 'dotted')
   guides(color=guide_legend("Network"))+
   theme_bw(base_size = 12)
 
