@@ -4,45 +4,31 @@ library(igraph)
 library(rgl)
 library(future.apply)
 
-# robustness data 
-load("robustnessMeans_500_0.5spread.Rdata")
+# robustness data
+# 0.5 spread
+# integer spread
+# loading 1:10 and 90-99 spread
+# CHOOSE ONE - all use all_rob
 
-perc_loss_0 <- data.frame(
-  perc_loss = 0, meanRob = 1.0, net = "pre"
-)
+#load("./Data/robustnessMeans_500_0.5spread.Rdata")
+load("./Data/integerSeq.Rdata")
+#load("./Data/smallLargeFocus.Rdata")
 
-# plot them
+# This plot has on the x-axis the percent of primary extinctions 
+# in the community.  The y-axis present the % of the community remaining
+# one could do 1-y to get the % loss.
+# With the current version, higher values mean that 
+# more of the food web is left after a set of extinctions
 
-preOnly <- all_rob |> 
-  filter(net == 'pre') |> 
-  bind_rows(perc_loss_0)
 
-tail(preOnly)
-
-ggplot(preOnly, aes(x = perc_loss/100, y = meanRob, col = net))+
+ggplot(all_rob, aes(x = perc_loss, y = meanRob*100, col = net))+
   geom_line()+geom_smooth(linewidth = 0.5)+
+  ylim(0,100)+
   labs(x = "Perecent Primary Extinction",
        y = "Robustness (% Community Remaining; n = 500)")+
-  geom_abline(slope = -1, intercept = 1, linetype = 'dotted')
-
-ggplot(preOnly, aes(x = meanRob))+
-  geom_histogram()
-
-# Rx primary leads to y-axis total loss
-# perc_loss_0_all <- data.frame(
-  perc_loss = 0, meanRob = 1.0, net = c("pre","post", "early", "late"))
-
-# all_rob <- all_rob |> bind_rows(perc_loss_0_all)
-
-
-ggplot(all_rob, aes(x = perc_loss/100, y = meanRob, col = net))+
-  geom_line()+geom_smooth(linewidth = 0.5)+
-  ylim(0,1)+
-  labs(x = "Perecent Primary Extinction",
-       y = "Robustness (% Community Remaining; n = 500)")+
-  geom_abline(slope = -1, intercept = 1, linetype = 'dotted')
+  geom_abline(slope = -1, intercept = 100, linetype = 'dotted')+
   guides(color=guide_legend("Network"))+
-  theme_bw(base_size = 12)
+  theme_bw(base_size = 15)
 
 # # Robustness Analysis ----------
 # 
