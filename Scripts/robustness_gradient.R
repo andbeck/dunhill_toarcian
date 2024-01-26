@@ -1,5 +1,6 @@
-#Need the following packages: igraph, dplyr
-#”spread” is a vector of numbers (1-99) that you want to analyze Robustness at (e.g., R50)
+# Need the following packages: igraph, dplyr
+# ”spread” is a vector of numbers (1-99) that you want to analyze Robustness at (e.g., R50)
+# Implements generalised ropbustness analysis from Jonsson et al Oikos 124: 446–457, 2015
 
 robustness_gradient <- function(graph, spread=seq(from=1,to=99,by=5)) {
   
