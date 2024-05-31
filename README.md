@@ -1,7 +1,10 @@
 ## dunhill_toarcian
 Code to Reproduce Dunhill et al analysis of secondary extinctions in Toarcian food webs, submitted to Nature Ecology and Evolution for review.
 
-The project should be initiated with `dunhill_toarcian.Rproj`.
+The project assumes the user has R and RStudio installed.
+
+To initiate the project, the user should double click the project file `dunhill_toarcian.Rproj`.
+
 There is a Scripts and Data folder
 
 ### Data Files
@@ -11,24 +14,24 @@ There is a Scripts and Data folder
     - metrics_time2.csv - details among times slices on network metrics
     - metrics_time.csv - details among times slices on network metrics
 
-### Helper Scripts/Function Scripts
+### Food Web Generation, Scenario Generation, Scenario Modelling, Robustness
 
-1. `pfwim.R` - contains several functions to define food webs using Shaw et al method and estimate network metrics and motifs
-2. `GenerateExtinctionSequences.R` - 
+1. `pfwim.R` - This file contains the functions necessary to construct food webs using Shaw et al (https://www.biorxiv.org/content/10.1101/2024.01.30.578036v1) method described in the MS.  It also contains bespoke functions to calcuate several metrics and motifs.  This is a self contained subset of the PFIM code base and does not require the package in that pre-print.
+2. `GenerateExtinctionSequences.R` is the primary tool to generate the secondary extinction scenarios from the networks.  The code - 
     - defines traits; 
-    - defines random stratfied samples of traits from core network; 
-    - defines function to implement secondary extinction cascades via primary extinctions from b using cheddar RemoveNodes() function; 
-    - collects networks and extinction sequences.
-3. `plot_3d_foodwebs_orig.R` - Shaw et al functions to plot pfmim based food webs in 3D
-4. `robustness_gradient.R` - cacluate R_1-99 robustness following generalised method from Jonsson et al Oikos 124: 446–457, 2015
+    - defines the scenarios based on stratfied samples of traits from the reference network; 
+    - contains the function to implement secondary extinction cascades, via primary extinctions scenarios, using the R package `cheddar`'s function `RemoveNodes()`; 
+    - collects and stores the simulated networks and extinction sequences.
+3. `robustness_gradient.R` - function to cacluate robustness following generalised method from Jonsson et al Oikos 124: 446–457, 2015
 
-### Visualisation of networks in 3D - produces Fig 1
+### Visualisation of networks in 3D - produces features for Fig 1
 
-1.`MakeCompositeFigure.R`
+1. `plot_3d_foodwebs_orig.R` - Shaw et al (https://www.biorxiv.org/content/10.1101/2024.01.30.578036v1) functions to plot food webs in 3D.
+2. See `MakeCompositeFigure.R` for final figure.
 
 ### Analysis of secondary exinction scenarios - Produces Figure 2a,b.
 
-1.`AnalyseToarcianNetworks.R` - estimates several structural metrics, motifs and True Skill Statistic from simulated networks.  
+1.`AnalyseToarcianNetworks.R` - estimates several structural metrics, motifs and True Skill Statistic from secondary extinction scenarios and the outcome networks.  
 
 ### Analysis of network structure through time - Produces Figure 2c,d.
 
@@ -40,4 +43,4 @@ There is a Scripts and Data folder
 
 ### Robustness Evaluation Fig 4
 
-1.`RobustnessTest_FineScale.R`
+1.`RobustnessTest_FineScale.R` - uses robustness_gradient.R above to generate analysis and Fig 4.
