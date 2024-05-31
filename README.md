@@ -3,9 +3,12 @@ Code to Reproduce Dunhill et al analysis of secondary extinctions in Toarcian fo
 
 The project assumes the user has R and RStudio installed.
 
-To initiate the project, the user should double click the project file `dunhill_toarcian.Rproj`.
+To initiate the project, after cloning/downloading the file containing the Scripts and Data and project file, the user should double click the project file `dunhill_toarcian.Rproj`.
 
-There is a Scripts and Data folder
+Details for each file are provided below.  
+
+The reader/replicator/referee can start with network generation, scenario modelling or plotting/analysis.  The data from each of those steps is provided and the use of `read_csv()` or `load()` data is embedded in each stage to acquire the previous stages data.
+
 
 ### Data Files
 
