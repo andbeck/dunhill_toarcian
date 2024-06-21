@@ -16,10 +16,11 @@ The reader/replicator/referee can start with network generation, scenario modell
     - wrkWebs_allSeqs.RData - output from GenerateExintctionSequences (can be recreated with set.seed()) and used (loaded) in AnalyseToarcianNetworks.
     - metrics_time2.csv - details among times slices on network metrics
     - metrics_time.csv - details among times slices on network metrics
+    - feeding_rules.csv - input constraints on feeding for pfim model
 
 ### Food Web Generation, Scenario Generation, Scenario Modelling, Robustness
 
-1. `pfwim.R` - This file contains the functions necessary to construct food webs using Shaw et al (https://www.biorxiv.org/content/10.1101/2024.01.30.578036v1) method described in the MS.  It also contains bespoke functions to calcuate several metrics and motifs.  This is a self contained subset of the PFIM code base and does not require the package in that pre-print.
+1. `pfim.R` - This file contains the functions necessary to construct food webs using Shaw et al (https://www.biorxiv.org/content/10.1101/2024.01.30.578036v1) method described in the MS.  It also contains bespoke functions to calculate several metrics and motifs.  This is a self contained subset of the PFIM code base and does not require the package in that pre-print.  The `infer_edgelist()` function in this script file does the primary work, and calls the `feeding_rules.csv` file alongside the input data.
 2. `GenerateExtinctionSequences.R` is the primary tool to generate the secondary extinction scenarios from the networks.  The code - 
     - defines traits; 
     - defines the scenarios based on stratfied samples of traits from the reference network; 
