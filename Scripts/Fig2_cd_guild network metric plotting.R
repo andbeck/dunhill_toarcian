@@ -114,4 +114,4 @@ motifPlot2 <- ggplot(guildsMotifDat2, aes(x = time2, y =Value, group = Metric))+
 
 
 # patchwork layout ----
-# structPlot+motifPlot
+structPlot+motifPlot2

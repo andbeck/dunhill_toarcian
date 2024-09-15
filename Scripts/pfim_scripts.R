@@ -397,7 +397,7 @@ calc_betweenness <- function(fw, return_mean = FALSE, normalize = FALSE) {
 
 calc_motif_stats <- function(graph) {
   graph <- igraph::simplify(graph, remove.multiple = T, remove.loops = FALSE)
-  triad.count <- igraph::triad.census(graph)
+  triad.count <- igraph::triad_census(graph)
   graph_size <- as.numeric(as.character(vcount(graph)))
 
   names(triad.count) <- c(
