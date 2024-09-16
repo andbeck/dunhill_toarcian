@@ -10,16 +10,24 @@ library(future.apply)
 # loading 1:10 and 90-99 spread
 # CHOOSE ONE - all use all_rob
 
-#load("./Data/robustnessMeans_500_0.5spread.Rdata")
-load("./Data/integerSeq.Rdata")
+#load("./Data/integerSeq.Rdata")
 #load("./Data/smallLargeFocus.Rdata")
+
+## Make the Publication Figure 3 (16 Sept 2024)
+load("./Data/robustnessMeans_500_0.5spread.Rdata")
+spread <- seq(from = 1, to = 99, by = 0.5)
+net = factor(c("pre", "post", "early", "late"),
+             levels = c("pre", "post", "early", "late"))
+
+all_rob <- bind_rows(out_g1, out_g2,out_g3, out_g4) |>
+                       mutate(net = rep(net, each = length(spread)))
+
 
 # This plot has on the x-axis the percent of primary extinctions 
 # in the community.  The y-axis present the % of the community remaining
 # one could do 1-y to get the % loss.
 # With the current version, higher values mean that 
 # more of the food web is left after a set of extinctions
-
 
 ggplot(all_rob, aes(x = perc_loss, y = meanRob*100, col = net))+
   geom_line()+geom_smooth(linewidth = 0.5)+

@@ -176,22 +176,22 @@ out_g4 <- do.call("rbind", rob_g4) |>
     meanRob = mean(robustness)
   )
 
-# combine it all
-net = factor(c("pre", "post", "early", "late"),
-             levels = c("pre", "post", "early", "late"))
-
-all_rob <- bind_rows(out_g1, out_g2,
-                      out_g3, out_g4) |>
-  mutate(net = rep(net,each = length(spread3)))
-
-ggplot(all_rob, aes(x = perc_loss, y = meanRob*100, col = net))+
-  geom_line()+geom_smooth(linewidth = 0.5)+
-  ylim(0,100)+
-  labs(x = "Perecent Primary Extinction",
-       y = "Robustness (% Community Remaining; n = 500)")+
-  geom_abline(slope = -1, intercept = 100, linetype = 'dotted')+
-  guides(color=guide_legend("Network"))+
-  theme_bw(base_size = 15)
-
-integerSeq <- list(all_rob, out_g1, out_g2, out_g3, out_g4)
-save(integerSeq, file = "integerSeq.Rdata")
+# # combine it all
+# net = factor(c("pre", "post", "early", "late"),
+#              levels = c("pre", "post", "early", "late"))
+# 
+# all_rob <- bind_rows(out_g1, out_g2,
+#                       out_g3, out_g4) |>
+#   mutate(net = rep(net,each = length(spread3)))
+# 
+# ggplot(all_rob, aes(x = perc_loss, y = meanRob*100, col = net))+
+#   geom_line()+geom_smooth(linewidth = 0.5)+
+#   ylim(0,100)+
+#   labs(x = "Perecent Primary Extinction",
+#        y = "Robustness (% Community Remaining; n = 500)")+
+#   geom_abline(slope = -1, intercept = 100, linetype = 'dotted')+
+#   guides(color=guide_legend("Network"))+
+#   theme_bw(base_size = 15)
+# 
+# integerSeq <- list(all_rob, out_g1, out_g2, out_g3, out_g4)
+# save(integerSeq, file = "integerSeq.Rdata")

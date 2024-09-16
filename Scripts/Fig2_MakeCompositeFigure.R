@@ -6,12 +6,12 @@ library(patchwork)
 ## Produces TSS plot and mean difference plot ----
 # TSS_graph
 # DiffMeans13
-source("Scripts/AnalyseToarcianNetworks_update4Publication.R")
+source("Scripts/Fig2_ab_AnalyseToarcianNetworks_update4Publication.R")
 
 # produces structure and motif plot ----
 # StructPlot
 # motifPlot2
-source("Scripts/guild network metric plotting.R")
+source("Scripts/Fig2_cd_guild network metric plotting.R")
 
 # combine ----
 ## Vertical (using) ----
