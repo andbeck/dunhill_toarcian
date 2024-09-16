@@ -32,7 +32,7 @@ all_rob <- bind_rows(out_g1, out_g2,out_g3, out_g4) |>
 ggplot(all_rob, aes(x = perc_loss, y = meanRob*100, col = net))+
   geom_line()+geom_smooth(linewidth = 0.5)+
   ylim(0,100)+
-  labs(x = "Perecent Primary Extinction",
+  labs(x = "Percent Primary Extinction",
        y = "Robustness (% Community Remaining; n = 500)")+
   geom_abline(slope = -1, intercept = 100, linetype = 'dotted')+
   guides(color=guide_legend("Network"))+
