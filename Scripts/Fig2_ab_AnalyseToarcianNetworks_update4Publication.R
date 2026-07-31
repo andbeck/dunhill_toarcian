@@ -8,6 +8,14 @@
 ## motifs
 ## True Skill Statistic Metrics.
 
+## UPDATE - July 2026
+## New Data Input wrkWebs_allSeqs_updateJuly2026.RData
+### all traits corrected for ordering 
+### adds categorical vuln and gen.  USING THESE
+### LINE 119 change choice.
+### Line 191
+### Line 278 Broken
+
 # CRAN R libraries ----
 ## libraries for network things ----
 library(cheddar)
@@ -31,7 +39,11 @@ source("Scripts/pfim_scripts.R")
 # This must have been run first.
 # These data are provided... you do not need to run them.
 
-load("Data/wrkWebs_allSeqs.RData")
+# original
+#load("Data/wrkWebs_allSeqs.RData")
+
+#Erratum Update
+load("Data/wrkWebs_allSeqs_updateJuly2026.RData")
 
 # check to see that data exists
 ifelse(exists("wrkWebs_allSeqs", 1), 
@@ -106,8 +118,9 @@ traitOrder <- c("rand",
                 "tier_i2p","tier_p2i",
                 "mot_fn","mot_nf",
                 "calc_h2l","calc_l2h",
-                "gen_l2h","gen_h2l",
-                "vuln_l2h","vuln_h2l")
+                # These are the new categoricals
+                "genCat_l2h","genCat_h2l",
+                "vulnCat_l2h","vulnCat_h2l")
 
 # define metric order for plotting ----
 metricOrder <- c("connectance","mean_normalized_degree",
@@ -142,7 +155,9 @@ metricOrder <- c("connectance","mean_normalized_degree",
 mm <- masterStats %>% 
   mutate(trait = factor(trait, levels = traitOrder)) %>% 
   mutate(metric = factor(metric, levels = metricOrder)) %>% 
-  filter(metric != "size")
+  filter(metric != "size") |> 
+  # new - to miss out the continuous gen and vuln
+  na.omit()
 
 ## master reference data ----
 postMetrics <- jackNetworks(postCom_Guild) %>% 
@@ -161,6 +176,7 @@ nets <- mm %>% filter(metric != "TSS") %>%
 # motif metrics
 mots <- mm %>% filter(grepl("mot", metric))
 # True Skill metric
+## Note change to genCat, vulnCat (July 2026)
 TSSs <- mm %>% filter(metric == "TSS") %>% 
   mutate(trait2 = case_when(
     trait == "rand" ~ "Random",
@@ -172,10 +188,10 @@ TSSs <- mm %>% filter(metric == "TSS") %>%
     trait == "mot_nf" ~ "Motility (none-fast)",
     trait == "calc_l2h" ~ "Calcified (low-high)",
     trait == "calc_h2l" ~ "Calcified (high-low)",
-    trait == "gen_l2h" ~ "Generalism (low-high)",
-    trait == "gen_h2l" ~ "Generalism (high-low)",
-    trait == "vuln_l2h" ~ "Vulnerability (low-high)",
-    trait == "vuln_h2l" ~ "Vulnerability (high-low)"
+    trait == "genCat_l2h" ~ "Generalism (low-high)",
+    trait == "genCat_h2l" ~ "Generalism (high-low)",
+    trait == "vulnCat_l2h" ~ "Vulnerability (low-high)",
+    trait == "vulnCat_h2l" ~ "Vulnerability (high-low)"
   ))
 
 # post (empirical) motif and network metrics
@@ -260,6 +276,8 @@ TSS_graph <- ggplot(TSSs,
 ## Data for Graph (b): difference to reference ----
 
 ## generate differences from empirical ----
+
+### NEEDS FIXING - 31 July dimensions not working
 
 # metrics
 mets <- rep(metricOrder[metricOrder!="size"], each = 13)
